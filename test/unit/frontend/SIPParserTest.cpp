@@ -73,15 +73,6 @@ TEST_CASE("SIP Parser: bool literals", "[SIP Parser]") {
   REQUIRE(ParserHelper::is_parsable(stream));
 }
 
-TEST_CASE("SIP Parser: bool literals", "[SIP Parser]") {
-  std::stringstream stream;
-  stream << R"(
-      main() { var x, y; x = true; y = false; return x + y; }
-    )";
-
-  REQUIRE(ParserHelper::is_parsable(stream));
-}
-
 TEST_CASE("SIP Parser: boolean logic", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(
@@ -114,7 +105,7 @@ TEST_CASE("SIP Parser: unbalanced logical expression", "[SIP Parser]") {
 TEST_CASE("SIP Parser: unbalanced non-short-circuiting expression", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(
-      operators() { var x; x = y | & 1; return x; }
+      operators() { var x; x = x & | 1; return x; }
     )";
 
   REQUIRE_FALSE(ParserHelper::is_parsable(stream));
