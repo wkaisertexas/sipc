@@ -37,11 +37,11 @@ The goal of this document is to split tasks for writing unit tests and ensure we
   
 ##  For loop using an iterator-style for (E1 : E2) S
 
-- [ ] Making a for loop with two identifiers
-- [ ] Making a for loop with an expression and an identifier
-- [ ] Making a for loop with two expressions 
+- [X] Making a for loop with two identifiers
+- [X] Making a for loop with an expression and an identifier
+- [X] Making a for loop with two expressions 
 
 # For loop using a range-style for (E1 : E2 .. E3 by E4) S, where the by E4 increment specification is optional and defaults to 1.
 
-- [ ] For loop using range based with identifiers
-- [ ] For loop using range based with by
+- [X] For loop using range based with identifiers
+- [X] For loop using range based with by

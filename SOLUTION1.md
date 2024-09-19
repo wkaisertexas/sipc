@@ -52,12 +52,16 @@ fieldExpr : IDENTIFIER ':' expr ;
 
 ## Workflow
 
-Development of the grammar was completed in the [ANTLR Lab](http://lab.antlr.org/) to rapidly make changes without needing to rebuild the grammar. In addition to being faster to prototype, using the ANTLR lab ensured that certain features of the new language, namely, nested ternaries were parsed properly.
+Development of the grammar was completed in the [ANTLR Lab](http://lab.antlr.org/) to rapidly make changes without needing to rebuild the project each time. In addition to being faster to prototype, using the ANTLR lab ensured that certain features of the new language, namely, nested ternaries were parsed properly.
 
 For example, the following SIP program was parsed into:
 
 ```c
-fn2() { var x, y; x = x ? x ? x : y : y; return x + y; }
+fn2() { 
+     var x, y;
+     x = x ? x ? x : y : y; 
+     return x + y; 
+}
 ```
 
 ![Document tree of the SIP program](./docs/assets/summaries/nested-ternaries-parse-tree.png)

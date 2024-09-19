@@ -91,6 +91,111 @@ TEST_CASE("SIP Parser: plusplus and minus minus stmts", "[SIP Parser]") {
   REQUIRE(ParserHelper::is_parsable(stream));
 }
 
+TEST_CASE("SIP Parser: For loop with two identifiers", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for(i : x) {
+        }
+        return 1;
+      }
+    )";
+
+  REQUIRE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SIP Parser: For loop with identifer and expression", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for(i : []) {
+        }
+        return 1;
+      }
+    )";
+
+  REQUIRE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SIP Parser: For loop with expression and identifer", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for(i + 1 : x) {
+        }
+        return 1;
+      }
+    )";
+
+  REQUIRE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SIP Parser: For loop with two expressions", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for(i + 1 : []) {
+        }
+        return 1;
+      }
+    )";
+
+  REQUIRE(ParserHelper::is_parsable(stream));
+}
+
+
+TEST_CASE("SIP Parser: For loop with range", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for(i : 1..2) {
+        }
+        return 1;
+      }
+    )";
+
+  REQUIRE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SIP Parser: For loop with range as identifiers", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for(i : x..y) {
+        }
+        return 1;
+      }
+    )";
+
+  REQUIRE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SIP Parser: For loop with expression increment", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for(i : x..y by 2) {
+        }
+        return 1;
+      }
+    )";
+
+  REQUIRE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SIP Parser: For loop with identifer increment", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for(i : x..y by z) {
+        }
+        return 1;
+      }
+    )";
+
+  REQUIRE(ParserHelper::is_parsable(stream));
+}
+
 /************ The following are expected to fail parsing ************/
 
 TEST_CASE("SIP Parser: unbalanced logical expression", "[SIP Parser]") {
@@ -115,6 +220,32 @@ TEST_CASE("SIP Parser: xor (short circuiting expression is not supported)", "[SI
   std::stringstream stream;
   stream << R"(
       operators() { var x; x = y ^ 1; return x; }
+    )";
+
+  REQUIRE_FALSE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SIP Parser: For loop without suffecient arguments fail", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for(i) {
+        }
+        return 1;
+      }
+    )";
+
+  REQUIRE_FALSE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SIP Parser: For loop without suffecient arguments fail 2", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        for() {
+        }
+        return 1;
+      }
     )";
 
   REQUIRE_FALSE(ParserHelper::is_parsable(stream));
