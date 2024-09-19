@@ -2,6 +2,8 @@
 #include "FrontEnd.h"
 #include "ParseError.h"
 #include "ParserHelper.h"
+#include <iostream>
+using namespace std;
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -89,6 +91,29 @@ TEST_CASE("SIP Parser: plusplus and minus minus stmts", "[SIP Parser]") {
     )";
 
   REQUIRE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SUP Parser: Multiplication and modulo have same precedence. ", "[TIP Parser]") {
+  std::stringstream stream;
+  stream << R"(main() { return x * x % x;})";
+  std::string expected = "(expr (expr (expr x) * (expr x)) % (expr x))";
+  std::string tree = ParserHelper::parsetree(stream);
+  REQUIRE(tree.find(expected) != std::string::npos);
+
+  stream << R"(main() { return x % x * x;})";
+  std::string expected2 = "(expr (expr (expr x) % (expr x)) * (expr x))";
+  std::string tree2 = ParserHelper::parsetree(stream);
+  REQUIRE(tree2.find(expected2) != std::string::npos);
+}
+
+
+TEST_CASE("SUP Parser: Negation and not have higher precedence.", "[TIP Parser]") {
+  std::stringstream stream;
+  stream << R"(main() { return a + -b % not c; })";
+  std::string expected = "(expr (expr a) + (expr (expr - (expr b)) % (expr (expr n o t c))))";
+  std::string tree = ParserHelper::parsetree(stream);
+  cout << tree;
+  REQUIRE(tree.find(expected) != std::string::npos);
 }
 
 TEST_CASE("SIP Parser: For loop with two identifiers", "[SIP Parser]") {
