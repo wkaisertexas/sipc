@@ -69,3 +69,5 @@ fn2() {
 ## Testing
 
 A markdown file [Deliverable 1](./docs/deliverables/deliverable1.md) was used as a working document to coordinate the delegation of testing between the group members. While the scope of all tests was followed as initially described, a few tests were merged using the existing tests in `TIPParserTest.cpp` expressed the same pattern. For instance, a general test `SIP Parser: operators` was used to test multiple operators in a single test.
+
+We had a little trouble getting the operator precedence tests to work because they required the expected strings to be very exact, but we solved that by just printing the full tree outputs and viewing the proper syntax. Using our tests, we found a bug with negation precdence.

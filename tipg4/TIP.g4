@@ -39,17 +39,18 @@ nameDeclaration : IDENTIFIER ;
 // weeding pass. 
 //
 expr : expr '(' (expr (',' expr)*)? ')' 	#funAppExpr
-     | expr '.' IDENTIFIER 			#accessExpr
+     | expr '.' IDENTIFIER 		#accessExpr
      | '*' expr 				#deRefExpr
      | SUB NUMBER				#negNumber
+     | SUB expr                 #negExpr
      | '&' expr					#refExpr
+     | '#' expr                 #arrayLength
+     | KNOT expr                #notExpr
      | expr op=(MUL | DIV | MOD) expr 		#multiplicativeExpr
      | expr op=(ADD | SUB) expr 		#additiveExpr
      | expr op=(GT | LTE | GTE | LT) expr 				#relationalExpr
      | expr op=(EQ | NE) expr 			#equalityExpr
      | expr '?' expr ':' expr   #ternaryExpr
-     | '#' IDENTIFIER           #arrayLength
-     | '#' arrayExpr            #arrayLengthLiteral
      | expr '[' expr ']' #arrayIndexingExpr
      | IDENTIFIER				#varExpr
      | NUMBER					#numExpr
@@ -57,8 +58,6 @@ expr : expr '(' (expr (',' expr)*)? ')' 	#funAppExpr
      | KALLOC expr				#allocExpr
      | KNULL					#nullExpr
      | op=(KTRUE | KFALSE)      #boolExpr
-     | SUB expr                 #negExpr
-     | KNOT expr                #not
      | recordExpr				#recordRule
      | arrayExpr                #arrayLiteral
      | expr op=(LOR | LAND) expr #nonShortCircuiting

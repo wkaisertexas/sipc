@@ -93,7 +93,7 @@ TEST_CASE("SIP Parser: plusplus and minus minus stmts", "[SIP Parser]") {
   REQUIRE(ParserHelper::is_parsable(stream));
 }
 
-TEST_CASE("SUP Parser: Multiplication and modulo have same precedence. ", "[TIP Parser]") {
+TEST_CASE("SUP Parser: Multiplication and modulo have same precedence. ", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(main() { return x * x % x;})";
   std::string expected = "(expr (expr (expr x) * (expr x)) % (expr x))";
@@ -107,12 +107,27 @@ TEST_CASE("SUP Parser: Multiplication and modulo have same precedence. ", "[TIP 
 }
 
 
-TEST_CASE("SUP Parser: Negation and not have higher precedence.", "[TIP Parser]") {
+TEST_CASE("SUP Parser: Negation and not have higher precedence.", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(main() { return a + -b % not c; })";
-  std::string expected = "(expr (expr a) + (expr (expr - (expr b)) % (expr (expr n o t c))))";
+  std::string expected = "(expr (expr a) + (expr (expr - (expr b)) % (expr not (expr c))))";
   std::string tree = ParserHelper::parsetree(stream);
-  cout << tree;
+  REQUIRE(tree.find(expected) != std::string::npos);
+}
+
+TEST_CASE("SUP Parser: Array length has higher precedence.", "[TIP Parser]") {
+  std::stringstream stream;
+  stream << R"(main() { return #a + b; })";
+  std::string expected = "(expr (expr # (expr a)) + (expr b))";
+  std::string tree = ParserHelper::parsetree(stream);
+  REQUIRE(tree.find(expected) != std::string::npos);
+}
+
+TEST_CASE("SUP Parser: Relational operators have higher precedence than equality operators.", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(main() { return a == b < c; })";
+  std::string expected = "(expr (expr a) == (expr (expr b) < (expr c)))";
+  std::string tree = ParserHelper::parsetree(stream);
   REQUIRE(tree.find(expected) != std::string::npos);
 }
 
@@ -146,7 +161,7 @@ TEST_CASE("SIP Parser: For loop with expression and identifer", "[SIP Parser]") 
   std::stringstream stream;
   stream << R"(
       fn() {
-        for(i + 1 : x) {
+        for(a[i] : x) {
         }
         return 1;
       }
@@ -159,7 +174,7 @@ TEST_CASE("SIP Parser: For loop with two expressions", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(
       fn() {
-        for(i + 1 : []) {
+        for(a[i] : []) {
         }
         return 1;
       }
