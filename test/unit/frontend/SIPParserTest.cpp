@@ -40,6 +40,8 @@ TEST_CASE("SIP Parser: operators", "[SIP Parser]") {
         x = x <= 1;
         x = x < 1;
         x = x > 1;
+        x = not x;
+        x = #x;
         return x;
       }
     )";
@@ -50,7 +52,14 @@ TEST_CASE("SIP Parser: operators", "[SIP Parser]") {
 TEST_CASE("SIP Parser: arrays", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(
-      r() { var x, y; x = [1, 2, 3, 4, 5]; y = #x; y = x[0]; y = [1, 2, 3][1]; return x; }
+      r() { 
+        var x, y; 
+        x = [1, 2, 3, 4, 5]; 
+        y = #x; 
+        y = x[0]; 
+        y = [1, 2, 3][1]; 
+        return x; 
+      }
     )";
 
   REQUIRE(ParserHelper::is_parsable(stream));
@@ -59,8 +68,16 @@ TEST_CASE("SIP Parser: arrays", "[SIP Parser]") {
 TEST_CASE("SIP Parser: ternary expr", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(
-      fn1() { var x, y; x = x ? x : y; return x + y; }
-      fn2() { var x, y; x = x ? x ? x : y : y; return x + y; }
+      fn1() { 
+        var x, y; 
+        x = x ? x : y; 
+        return x + y; 
+      }
+      fn2() { 
+        var x, y; 
+        x = x ? x ? x : y : y; 
+        return x + y; 
+      }
     )";
 
   REQUIRE(ParserHelper::is_parsable(stream));
@@ -69,7 +86,12 @@ TEST_CASE("SIP Parser: ternary expr", "[SIP Parser]") {
 TEST_CASE("SIP Parser: bool literals", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(
-      main() { var x, y; x = true; y = false; return x + y; }
+      main() { 
+        var x, y; 
+        x = true; 
+        y = false; 
+        return x and y; 
+      }
     )";
 
   REQUIRE(ParserHelper::is_parsable(stream));
@@ -78,7 +100,12 @@ TEST_CASE("SIP Parser: bool literals", "[SIP Parser]") {
 TEST_CASE("SIP Parser: boolean logic", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(
-      main() { var x, y; x = true; x = x and y or x | y; return x + y; }
+      main() { 
+        var x, y; 
+        x = true; 
+        x = x and y or x | y; 
+        return x;
+      }
     )";
 
   REQUIRE(ParserHelper::is_parsable(stream));
@@ -87,7 +114,12 @@ TEST_CASE("SIP Parser: boolean logic", "[SIP Parser]") {
 TEST_CASE("SIP Parser: plusplus and minus minus stmts", "[SIP Parser]") {
   std::stringstream stream;
   stream << R"(
-      main() { var x, y; x++; y--; return x + y; }
+      main() { 
+        var x, y; 
+        x++; 
+        y--; 
+        return x + y; 
+      }
     )";
 
   REQUIRE(ParserHelper::is_parsable(stream));
@@ -127,6 +159,14 @@ TEST_CASE("SUP Parser: Relational operators have higher precedence than equality
   std::stringstream stream;
   stream << R"(main() { return a == b < c; })";
   std::string expected = "(expr (expr a) == (expr (expr b) < (expr c)))";
+  std::string tree = ParserHelper::parsetree(stream);
+  REQUIRE(tree.find(expected) != std::string::npos);
+}
+
+TEST_CASE("SUP Parser: Ternery if statement precedence.", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(main() { return x ? x ? 1 : 2 : 3; })";
+  std::string expected = "(expr (expr x) ? (expr (expr x) ? (expr 1) : (expr 2)) : (expr 3))";
   std::string tree = ParserHelper::parsetree(stream);
   REQUIRE(tree.find(expected) != std::string::npos);
 }
@@ -229,6 +269,21 @@ TEST_CASE("SIP Parser: For loop with identifer increment", "[SIP Parser]") {
       fn() {
         for(i : x..y by z) {
         }
+        return 1;
+      }
+    )";
+
+  REQUIRE(ParserHelper::is_parsable(stream));
+}
+
+TEST_CASE("SIP Parser: For loop with no curly brackets", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        var x;
+        for(i : x) x = x + 1;
+        for(i : x..y) x = x + 1;
+        for(i : x..y by z) x = x + 1;
         return 1;
       }
     )";
