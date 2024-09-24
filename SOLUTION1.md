@@ -11,43 +11,35 @@ During this project, the Tiny Imperative Programming (TIP) Language had the gram
 
 ## Challenges
 
-When developing the grammar, an error with left recursion causing ternaries to not be parsed correctly. The ternary as added in a similar way to `recordExpr` or `arrayExpr`. However, adding a ternary as part of `expr` itself eliminated the left-recursion present.
+When developing the grammar, we tried to add the ternery expression as a seperate rule like `recordExpr` or `arrayExpr`, but that caused left-recursion issues. We added the ternary rule directly to the `expr` rule to fix the prbolem. We also had the tendency to be too specific when writing the grammar for operators, but we realized that just using `expr` for most things is better.
 
 ```console
 expr : expr '(' (expr (',' expr)*)? ')' 	#funAppExpr
-     | expr '.' IDENTIFIER 			#accessExpr
+     | expr '.' IDENTIFIER 		#accessExpr
      | '*' expr 				#deRefExpr
      | SUB NUMBER				#negNumber
-     | '&' expr					#refExpr
+     | SUB expr                    #negExpr
+     | '&' expr				#refExpr
+     | '#' expr                    #arrayLength
+     | KNOT expr                   #notExpr
      | expr op=(MUL | DIV | MOD) expr 		#multiplicativeExpr
-     | expr op=(ADD | SUB) expr 		#additiveExpr
-     | expr op=(GT | LTE | GTE | LT) expr 				#relationalExpr
+     | expr op=(ADD | SUB) expr 		     #additiveExpr
+     | expr op=(GT | LTE | GTE | LT) expr    #relationalExpr
      | expr op=(EQ | NE) expr 			#equalityExpr
-     | expr '?' expr ':' expr   #ternaryExpr
-     | '#' IDENTIFIER           #arrayLength
-     | '#' arrayExpr            #arrayLengthLiteral
-     | expr '[' expr ']' #arrayIndexingExpr
+     | expr '?' expr ':' expr      #ternaryExpr
+     | expr '[' expr ']'           #arrayIndexingExpr
      | IDENTIFIER				#varExpr
      | NUMBER					#numExpr
      | KINPUT					#inputExpr
      | KALLOC expr				#allocExpr
      | KNULL					#nullExpr
-     | op=(KTRUE | KFALSE)      #boolExpr
-     | SUB expr                 #negExpr
-     | KNOT expr                #not
+     | op=(KTRUE | KFALSE)         #boolExpr
      | recordExpr				#recordRule
-     | arrayExpr                #arrayLiteral
-     | expr op=(LOR | LAND) expr #nonShortCircuiting
-     | expr op=(KAND | KOR) expr #boolOps
+     | arrayExpr                   #arrayLiteral
+     | expr op=(LOR | LAND) expr   #nonShortCircuiting
+     | expr op=(KAND | KOR) expr   #boolOps
      | '(' expr ')'				#parenExpr
 ;
-
-recordExpr : '{' (fieldExpr (',' fieldExpr)*)? '}' ;
-
-arrayExpr : '[' (expr (',' expr)*)? ']'
-          | '[' expr KOF expr ']' ;
-
-fieldExpr : IDENTIFIER ':' expr ;
 ```
 
 ## Workflow
@@ -70,4 +62,4 @@ fn2() {
 
 A markdown file [Deliverable 1](./docs/deliverables/deliverable1.md) was used as a working document to coordinate the delegation of testing between the group members. While the scope of all tests was followed as initially described, a few tests were merged using the existing tests in `TIPParserTest.cpp` expressed the same pattern. For instance, a general test `SIP Parser: operators` was used to test multiple operators in a single test.
 
-We had a little trouble getting the operator precedence tests to work because they required the expected strings to be very exact, but we solved that by just printing the full tree outputs and viewing the proper syntax. Using our tests, we found a bug with negation precdence.
+We had a little trouble getting the operator precedence tests to work because they required the expected strings to be very exact, but we solved that by just printing the full tree outputs and viewing the proper syntax. Because of our tests, we were able to find and fix a bug with negation precdence.

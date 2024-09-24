@@ -345,3 +345,15 @@ TEST_CASE("SIP Parser: For loop without suffecient arguments fail 2", "[SIP Pars
 
   REQUIRE_FALSE(ParserHelper::is_parsable(stream));
 }
+
+TEST_CASE("SIP Parser: Ternery conditional without inputs.", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(
+      fn() {
+        x = ? : ;
+        return 1;
+      }
+    )";
+
+  REQUIRE_FALSE(ParserHelper::is_parsable(stream));
+}
