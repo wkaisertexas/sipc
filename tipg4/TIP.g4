@@ -1,3 +1,5 @@
+
+
 grammar TIP;
 // Grammar for Moeller and Schwartzbach's Tiny Imperative Language (TIP)
 
@@ -37,24 +39,36 @@ nameDeclaration : IDENTIFIER ;
 // weeding pass. 
 //
 expr : expr '(' (expr (',' expr)*)? ')' 	#funAppExpr
-     | expr '.' IDENTIFIER 			#accessExpr
+     | expr '.' IDENTIFIER 		#accessExpr
      | '*' expr 				#deRefExpr
      | SUB NUMBER				#negNumber
+     | SUB expr                 #negExpr
      | '&' expr					#refExpr
-     | expr op=(MUL | DIV) expr 		#multiplicativeExpr
+     | '#' expr                 #arrayLength
+     | KNOT expr                #notExpr
+     | expr op=(MUL | DIV | MOD) expr 		#multiplicativeExpr
      | expr op=(ADD | SUB) expr 		#additiveExpr
-     | expr op=GT expr 				#relationalExpr
+     | expr op=(GT | LTE | GTE | LT) expr 				#relationalExpr
      | expr op=(EQ | NE) expr 			#equalityExpr
+     | expr '?' expr ':' expr   #ternaryExpr
+     | expr '[' expr ']' #arrayIndexingExpr
      | IDENTIFIER				#varExpr
      | NUMBER					#numExpr
      | KINPUT					#inputExpr
      | KALLOC expr				#allocExpr
      | KNULL					#nullExpr
+     | op=(KTRUE | KFALSE)      #boolExpr
      | recordExpr				#recordRule
+     | arrayExpr                #arrayLiteral
+     | expr op=(LOR | LAND) expr #nonShortCircuiting
+     | expr op=(KAND | KOR) expr #boolOps
      | '(' expr ')'				#parenExpr
 ;
 
 recordExpr : '{' (fieldExpr (',' fieldExpr)*)? '}' ;
+
+arrayExpr : '[' (expr (',' expr)*)? ']'
+          | '[' expr KOF expr ']' ;
 
 fieldExpr : IDENTIFIER ':' expr ;
 
@@ -62,7 +76,9 @@ fieldExpr : IDENTIFIER ':' expr ;
 
 statement : blockStmt
     | assignStmt
+    | updateStmt
     | whileStmt
+    | forStmt
     | ifStmt
     | outputStmt
     | errorStmt
@@ -70,9 +86,15 @@ statement : blockStmt
 
 assignStmt : expr '=' expr ';' ;
 
+updateStmt : expr op=(MM | PP) ';' ;
+
 blockStmt : '{' (statement*) '}' ;
 
 whileStmt : KWHILE '(' expr ')' statement ;
+
+forStmt : KFOR '(' expr ':' expr '..' expr KBY expr ')' statement
+    | KFOR '(' expr ':' expr '..' expr ')' statement
+    | KFOR '(' expr ':' expr ')' statement ;
 
 ifStmt : KIF '(' expr ')' statement (KELSE statement)? ;
 
@@ -92,6 +114,19 @@ DIV : '/' ;
 ADD : '+' ;
 SUB : '-' ;
 GT  : '>' ;
+MOD : '%' ;
+
+LOR : '|';
+LAND : '&';
+
+MM  : '--';
+PP  : '++';
+
+// Additional opperators
+LT  : '<' ;
+GTE : '>=';
+LTE : '<=';
+
 EQ  : '==' ;
 NE  : '!=' ;
 
@@ -102,6 +137,8 @@ NUMBER : [0-9]+ ;
 KALLOC  : 'alloc' ;
 KINPUT  : 'input' ;
 KWHILE  : 'while' ;
+KFOR    : 'for' ;
+KBY     : 'by' ;
 KIF     : 'if' ;
 KELSE   : 'else' ;
 KVAR    : 'var' ;
@@ -109,6 +146,12 @@ KRETURN : 'return' ;
 KNULL   : 'null' ;
 KOUTPUT : 'output' ;
 KERROR  : 'error' ;
+KTRUE   : 'true' ;
+KFALSE  : 'false' ;
+KNOT    : 'not' ;
+KAND    : 'and' ;
+KOR     : 'or' ;
+KOF     : 'of' ;
 
 // Keyword to declare functions as polymorphic
 KPOLY   : 'poly' ;
@@ -126,3 +169,5 @@ WS : [ \t\n\r]+ -> skip ;
 BLOCKCOMMENT: '/*' .*? '*/' -> skip ;
 
 COMMENT : '//' ~[\n\r]* -> skip ;
+
+
