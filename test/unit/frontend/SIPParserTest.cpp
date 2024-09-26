@@ -147,6 +147,14 @@ TEST_CASE("SUP Parser: Negation and not have higher precedence.", "[SIP Parser]"
   REQUIRE(tree.find(expected) != std::string::npos);
 }
 
+TEST_CASE("SUP Parser: Negation has higher precedence.", "[SIP Parser]") {
+  std::stringstream stream;
+  stream << R"(main() { return -(a + b) * c; })";
+  std::string expected = "(expr (expr - (expr ( (expr (expr a) + (expr b)) ))) * (expr c))";
+  std::string tree = ParserHelper::parsetree(stream);
+  REQUIRE(tree.find(expected) != std::string::npos);
+}
+
 TEST_CASE("SUP Parser: Array length has higher precedence.", "[TIP Parser]") {
   std::stringstream stream;
   stream << R"(main() { return #a + b; })";
