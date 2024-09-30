@@ -1,9 +1,18 @@
 {
     "cmake.configureOnOpen": true,
-    "remote.SSH.defaultExtensions": [
-		"ms-vscode.cpptools-extension-pack",
-		"mike-lischke.vscode-antlr4",
-        "matepek.vscode-catch2-test-adapter"
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.autocomplete": "disabled",
+    "C_Cpp.autoAddBrackets": false,
+    "C_Cpp.formatOnType": false,
+    "clangd.enableCodeCompletion": true,
+    "clangd.restartAfterCrash": true,
+    "clangd.arguments": [
+        "--background-index",
+        "--background-index-priority=normal",
+        "--pch-storage=memory",
+        "--header-insertion=iwyu",
+        "--function-arg-placeholders",
+        "--completion-style=detailed"
     ],
     "cmake.generator": "Unix Makefiles",
     "cmake.buildDirectory": "${workspaceFolder}/build",

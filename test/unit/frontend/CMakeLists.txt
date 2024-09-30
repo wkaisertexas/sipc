@@ -3,6 +3,7 @@ add_executable(frontend_unit_tests
 target_sources(
   frontend_unit_tests
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/TIPParserTest.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/SIPParserTest.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/ASTBuilderTest.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/ASTPrinterTest.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/ASTVisualizerTest.cpp

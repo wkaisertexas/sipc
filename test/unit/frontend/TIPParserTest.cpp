@@ -267,6 +267,8 @@ TEST_CASE("TIP Parser: keywords as ids", "[TIP Parser]") {
   REQUIRE_FALSE(ParserHelper::is_parsable(stream));
 }
 
+// No longer viable now that <= operator is in the grammar.
+/* 
 TEST_CASE("TIP Lexer: illegal comparison token", "[TIP Lexer]") {
   std::stringstream stream;
   stream << R"(
@@ -275,7 +277,10 @@ TEST_CASE("TIP Lexer: illegal comparison token", "[TIP Lexer]") {
 
   REQUIRE_FALSE(ParserHelper::is_parsable(stream));
 }
+*/
 
+// No longer valid because the modulo operator has been added to the grammar.
+/*
 TEST_CASE("TIP Lexer: illegal operator token", "[TIP Lexer]") {
   std::stringstream stream;
   stream << R"(
@@ -284,6 +289,7 @@ TEST_CASE("TIP Lexer: illegal operator token", "[TIP Lexer]") {
 
   REQUIRE_FALSE(ParserHelper::is_parsable(stream));
 }
+*/
 
 TEST_CASE("TIP Lexer: illegal identifier token", "[TIP Lexer]") {
   std::stringstream stream;

@@ -6,6 +6,10 @@ tipc
 =========
 A compiler from TIP to llvm bitcode
 
+## Extension from TIP to SIP
+
+- [Solution 1: Extending the TIP parser to the SIP parser - Writeup](./SOLUTION1.md)
+
 
 ## TIP Language, Interpreter, and Analyzers
 
