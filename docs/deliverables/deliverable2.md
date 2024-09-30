@@ -8,7 +8,7 @@ Place a single x in the first line of each completed AST node.
 
 | Type                                      | Similar to      | ASTNode  | ASTVisitor  | ASTBuilder  | Pretty Printer | Full Code Coverage |
 | ----------------------------------------- | --------------- | -------- | ----------- | ----------- | -------------- | ------------------ |
-| Update Statement ++ and --                |                 |          |             |             |                |                    |
+| Update Statement ++ and --                |                 | x        | x           | x           | x              | x                  |
 | For Loop including for(x: y .. z by 2) {} |                 |          |             |             |                |                    |
 | Array Length with #                       |                 |          |             |             |                |                    |
 | Array Literal                             | Record Literal  |          |             |             |                |                    |

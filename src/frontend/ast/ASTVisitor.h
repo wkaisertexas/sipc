@@ -28,6 +28,8 @@ public:
   virtual void endVisit(ASTFunction *element) {}
   virtual bool visit(ASTNumberExpr *element) { return true; }
   virtual void endVisit(ASTNumberExpr *element) {}
+  virtual bool visit(ASTUpdateStmt *element) { return true; }
+  virtual void endVisit(ASTUpdateStmt *element) {}
   virtual bool visit(ASTVariableExpr *element) { return true; }
   virtual void endVisit(ASTVariableExpr *element) {}
   virtual bool visit(ASTBinaryExpr *element) { return true; }

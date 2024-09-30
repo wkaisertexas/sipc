@@ -49,6 +49,8 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTRecordExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTRefExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTRefExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTUpdateStmt.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTUpdateStmt.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTReturnStmt.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTReturnStmt.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTStmt.h

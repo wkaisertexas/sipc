@@ -187,6 +187,26 @@ TEST_CASE("PrettyPrinter: Test nested if print", "[PrettyPrinter]") {
   REQUIRE(ppString == expected);
 }
 
+TEST_CASE("PrettyPrinter: Test Update Stmt", "[PrettyPrinter]") {
+  std::stringstream stream;
+  stream << R"(prog() { var x; x++; return 0; })";
+
+  std::string expected = R"(prog() 
+{
+  var x;
+  x++;
+  return 0;
+}
+)";
+
+  std::stringstream pp;
+  auto ast = ASTHelper::build_ast(stream);
+  PrettyPrinter::print(ast.get(), pp, ' ', 2);
+  std::string ppString = GeneralHelper::removeTrailingWhitespace(pp.str());
+  expected = GeneralHelper::removeTrailingWhitespace(expected);
+  REQUIRE(ppString == expected);
+}
+
 TEST_CASE("PrettyPrinter: Test paren expr", "[PrettyPrinter]") {
   std::stringstream stream;
   stream << R"(prog() { var x, y; x = y * 3 + 4 - y; return 0; })";

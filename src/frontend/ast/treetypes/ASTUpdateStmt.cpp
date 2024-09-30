@@ -9,12 +9,12 @@ void ASTUpdateStmt::accept(ASTVisitor *visitor) {
 }
 
 std::ostream &ASTUpdateStmt::print(std::ostream &out) const {
-  if(getOp()) {
+  if(getIncrement()) {
     out << *getArg() << "++;";
   } else {
     out << *getArg() << "--;";
   }
-  
+
   return out;
 }
 

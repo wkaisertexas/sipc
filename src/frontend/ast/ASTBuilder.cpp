@@ -459,6 +459,18 @@ Any ASTBuilder::visitIfStmt(TIPParser::IfStmtContext *ctx) {
                            ctx->getStart()->getCharPositionInLine());
   return "";
 }
+ 
+Any ASTBuilder::visitUpdateStmt(TIPParser::UpdateStmtContext *ctx) {
+  visit(ctx->expr());
+  visitedStmt = std::make_shared<ASTUpdateStmt>(visitedExpr, opString(ctx->op->getType()));
+
+  LOG_S(1) << "Built AST node " << *visitedStmt;
+
+  // Set source location
+  visitedStmt->setLocation(ctx->getStart()->getLine(),
+                           ctx->getStart()->getCharPositionInLine());
+  return "";
+} // LCOV_EXCL_LINE
 
 Any ASTBuilder::visitOutputStmt(TIPParser::OutputStmtContext *ctx) {
   visit(ctx->expr());

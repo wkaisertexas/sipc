@@ -155,6 +155,12 @@ void PrettyPrinter::endVisit(ASTDeclStmt *element) {
       joinWithDelim(visitResults, ", ", element->getVars().size(), 1) + ";");
 }
 
+void PrettyPrinter::endVisit(ASTUpdateStmt *element){
+  std::string updateExpr = visitResults.back();
+  visitResults.pop_back();
+  visitResults.push_back(indent() + updateExpr + (element->getIncrement() ? "++" : "--") + ";");
+}
+
 void PrettyPrinter::endVisit(ASTAssignStmt *element) {
   std::string rhsString = visitResults.back();
   visitResults.pop_back();

@@ -52,6 +52,7 @@ public:
   virtual bool visit(ASTIfStmt *element) override;
   virtual void endVisit(ASTIfStmt *element) override;
   virtual void endVisit(ASTOutputStmt *element) override;
+  virtual void endVisit(ASTUpdateStmt *element) override;
   virtual void endVisit(ASTReturnStmt *element) override;
   virtual void endVisit(ASTErrorStmt *element) override;
 

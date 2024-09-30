@@ -28,6 +28,7 @@
 #include "ASTNumberExpr.h"
 #include "ASTOutputStmt.h"
 #include "ASTProgram.h"
+#include "ASTUpdateStmt.h"
 #include "ASTRecordExpr.h"
 #include "ASTRefExpr.h"
 #include "ASTReturnStmt.h"

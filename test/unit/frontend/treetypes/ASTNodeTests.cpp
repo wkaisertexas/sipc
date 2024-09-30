@@ -112,6 +112,26 @@ TEST_CASE("ASTBlockStmtTest: Test methods of AST subtype.",
     REQUIRE(stmts.size() == 2);
 }
 
+TEST_CASE("ASTUpdateStmtTest: Test methods of AST subtype.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo() {
+         var x;
+         x++;
+         return x+1;
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto stmt = ASTHelper::find_node<ASTUpdateStmt>(ast);
+    auto arg = dynamic_cast<ASTVariableExpr*>(stmt->getArg());
+
+   REQUIRE(stmt->getIncrement() == true);
+   REQUIRE(arg != nullptr);
+   REQUIRE(arg->getName() == "x");
+}
+
 TEST_CASE("ASTDeclNodeTest: Test methods of AST subtype.",
           "[ASTNodes]") {
     std::stringstream stream;

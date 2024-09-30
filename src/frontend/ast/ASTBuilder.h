@@ -43,8 +43,7 @@ public:
   Any visitNegNumber(TIPParser::NegNumberContext *ctx) override;
   Any visitAdditiveExpr(TIPParser::AdditiveExprContext *ctx) override;
   Any visitRelationalExpr(TIPParser::RelationalExprContext *ctx) override;
-  Any visitMultiplicativeExpr(
-      TIPParser::MultiplicativeExprContext *ctx) override;
+  Any visitMultiplicativeExpr(TIPParser::MultiplicativeExprContext *ctx) override;
   Any visitEqualityExpr(TIPParser::EqualityExprContext *ctx) override;
   Any visitParenExpr(TIPParser::ParenExprContext *ctx) override;
   Any visitNumExpr(TIPParser::NumExprContext *ctx) override;
@@ -64,6 +63,7 @@ public:
   Any visitBlockStmt(TIPParser::BlockStmtContext *ctx) override;
   Any visitWhileStmt(TIPParser::WhileStmtContext *ctx) override;
   Any visitIfStmt(TIPParser::IfStmtContext *ctx) override;
+  Any visitUpdateStmt(TIPParser::UpdateStmtContext *ctx) override;
   Any visitOutputStmt(TIPParser::OutputStmtContext *ctx) override;
   Any visitErrorStmt(TIPParser::ErrorStmtContext *ctx) override;
   Any visitReturnStmt(TIPParser::ReturnStmtContext *ctx) override;

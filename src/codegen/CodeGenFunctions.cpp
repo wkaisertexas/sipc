@@ -1,4 +1,3 @@
-
 #include <ASTDeclNode.h>
 
 #include "AST.h"
@@ -833,6 +832,16 @@ llvm::Value *ASTBlockStmt::codegen() {
   // If the block was empty return a nop
   return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
 } // LCOV_EXCL_LINE
+
+llvm::Value *ASTUpdateStmt::codegen(){
+    LOG_S(1) << "Generating code for " << *this;
+
+    llvm::Value *lastStmt = nullptr;
+
+    throw std::runtime_error("Update statement not implemented yet"); 
+
+    return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+}
 
 /*
  * The code generated for an WhileStmt looks like this:
