@@ -10,7 +10,7 @@ Place a single x in the first line of each completed AST node.
 | ----------------------------------------- | --------------- | -------- | ----------- | ----------- | -------------- | ------------------ |
 | Update Statement ++ and --                |                 | x        | x           | x           | x              | x                  |
 | For Loop including for(x: y .. z by 2) {} |                 |          |             |             |                |                    |
-| Array Length with #                       |                 |          |             |             |                |                    |
+| Array Length with #                       |                 | x        | x           | x           | x              | x                  |
 | Array Literal                             | Record Literal  |          |             |             |                |                    |
 | Array Range Expression                    |                 |          |             |             |                |                    |
 | Ternaries                                 |                 |          |             |             |                |                    |
