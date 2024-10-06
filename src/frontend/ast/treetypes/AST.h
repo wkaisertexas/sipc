@@ -12,6 +12,7 @@
 #include "ASTAllocExpr.h"
 #include "ASTAssignStmt.h"
 #include "ASTArrayLenExpr.h"
+#include "ASTTernaryExpr.h"
 #include "ASTBinaryExpr.h"
 #include "ASTBlockStmt.h"
 #include "ASTDeRefExpr.h"

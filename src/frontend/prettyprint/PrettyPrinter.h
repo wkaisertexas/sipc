@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ASTTernaryExpr.h"
 #include "ASTVisitor.h"
 #include <iostream>
 #include <ostream>
@@ -42,6 +43,7 @@ public:
   virtual void endVisit(ASTNullExpr *element) override;
   virtual void endVisit(ASTFieldExpr *element) override;
   virtual void endVisit(ASTRecordExpr *element) override;
+  virtual void endVisit(ASTTernaryExpr *element) override;
   virtual void endVisit(ASTAccessExpr *element) override;
   virtual void endVisit(ASTDeclNode *element) override;
   virtual void endVisit(ASTDeclStmt *element) override;

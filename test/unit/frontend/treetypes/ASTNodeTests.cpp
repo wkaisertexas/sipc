@@ -59,6 +59,23 @@ TEST_CASE("ASTArrayLenExpr: Test methods of AST subtype.",
     REQUIRE(o1.str() == "(#p)");
 }
 
+TEST_CASE("ASTTernaryExpr: Test methods of AST subtype.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo(p) {
+         return p ? 1 : 0;
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto expr = ASTHelper::find_node<ASTTernaryExpr>(ast);
+
+    std::stringstream o1;
+    o1 << *expr;
+    REQUIRE(o1.str() == "p ? 1 : 0");
+}
+
 TEST_CASE("ASTAssignStmtTest: Test methods of AST subtype.",
           "[ASTNodes]") {
     std::stringstream stream;

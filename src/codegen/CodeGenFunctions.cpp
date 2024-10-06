@@ -662,6 +662,19 @@ llvm::Value *ASTArrayLenExpr::codegen() {
   return nullptr;  
 }
 
+/* 
+ * Ternary expression code generation
+ *
+ * Generates a value from a ternary expression conditional
+ */
+llvm::Value *ASTTernaryExpr::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
+
+  throw std::runtime_error("Ternary expression not implemented yet");
+
+  return nullptr;
+}
+
 /* {field1 : val1, ..., fieldN : valN} record expression
  *
  * Builds an instance of the GlobalRecord using the declared fields

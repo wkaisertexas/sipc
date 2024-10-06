@@ -13,6 +13,6 @@ Place a single x in the first line of each completed AST node.
 | Array Length with #                       |                 | x        | x           | x           | x              | x                  |
 | Array Literal                             | Record Literal  |          |             |             |                |                    |
 | Array Range Expression                    |                 |          |             |             |                |                    |
-| Ternaries                                 |                 |          |             |             |                |                    |
+| Ternaries                                 |                 | x        | x           | x           | x              | x                  |
 | Booleans                                  | Number literals |          |             |             |                |                    |
 | Array Indexing                            | Record Literal  |          |             |             |                |                    |

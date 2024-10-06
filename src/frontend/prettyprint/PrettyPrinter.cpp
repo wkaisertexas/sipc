@@ -95,6 +95,17 @@ void PrettyPrinter::endVisit(ASTBinaryExpr *element) {
                          rightString + ")");
 }
 
+void PrettyPrinter::endVisit(ASTTernaryExpr *element) {
+  std::string elseString = visitResults.back();
+  visitResults.pop_back();
+  std::string thenString = visitResults.back();
+  visitResults.pop_back();
+  std::string condString = visitResults.back();
+  visitResults.pop_back();
+
+  visitResults.push_back(condString + " ? " + thenString + " : " + elseString);
+}
+
 void PrettyPrinter::endVisit(ASTInputExpr *element) {
   visitResults.push_back("input");
 }
