@@ -26,6 +26,26 @@ TEST_CASE("PrettyPrinter: Test default constructor", "[PrettyPrinter]") {
   REQUIRE(true);
 }
 
+TEST_CASE("PrettyPrinter: Test Array Length", "[PrettyPrinter]") {
+  std::stringstream stream;
+  stream << R"(prog() { var x,y; y = #x; return 0; })";
+
+  std::string expected = R"(prog() 
+{
+  var x, y;
+  y = #x;
+  return 0;
+}
+)";
+
+  std::stringstream pp;
+  auto ast = ASTHelper::build_ast(stream);
+  PrettyPrinter::print(ast.get(), pp, ' ', 2);
+  std::string ppString = GeneralHelper::removeTrailingWhitespace(pp.str());
+  expected = GeneralHelper::removeTrailingWhitespace(expected);
+  REQUIRE(ppString == expected);
+}
+
 TEST_CASE("PrettyPrinter: Test indentation", "[PrettyPrinter]") {
   std::stringstream stream;
   stream << R"(

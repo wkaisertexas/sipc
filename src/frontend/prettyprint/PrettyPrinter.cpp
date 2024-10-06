@@ -123,6 +123,12 @@ void PrettyPrinter::endVisit(ASTDeRefExpr *element) {
   visitResults.push_back("*" + base);
 }
 
+void PrettyPrinter::endVisit(ASTArrayLenExpr *element) {
+  std::string base = visitResults.back();
+  visitResults.pop_back();
+  visitResults.push_back("#" + base);
+}
+
 void PrettyPrinter::endVisit(ASTNullExpr *element) {
   visitResults.push_back("null");
 }

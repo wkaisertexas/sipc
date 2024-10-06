@@ -44,6 +44,8 @@ public:
   virtual void endVisit(ASTRefExpr *element) {}
   virtual bool visit(ASTDeRefExpr *element) { return true; }
   virtual void endVisit(ASTDeRefExpr *element) {}
+  virtual bool visit(ASTArrayLenExpr *element) { return true; }
+  virtual void endVisit(ASTArrayLenExpr *element) {}
   virtual bool visit(ASTNullExpr *element) { return true; }
   virtual void endVisit(ASTNullExpr *element) {}
   virtual bool visit(ASTFieldExpr *element) { return true; }

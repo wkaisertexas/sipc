@@ -650,6 +650,18 @@ llvm::Value *ASTDeRefExpr::codegen() {
   }
 }
 
+/* '#' array length expression
+ *  
+ * Generates the code for the length of an array
+ */
+llvm::Value *ASTArrayLenExpr::codegen() {
+  // LOG_S(1) << "Generating code for " << *this;
+  
+  throw std::runtime_error("Array length expression not implemented yet"); 
+
+  return nullptr;  
+}
+
 /* {field1 : val1, ..., fieldN : valN} record expression
  *
  * Builds an instance of the GlobalRecord using the declared fields

@@ -53,6 +53,7 @@ public:
   Any visitAllocExpr(TIPParser::AllocExprContext *ctx) override;
   Any visitRefExpr(TIPParser::RefExprContext *ctx) override;
   Any visitDeRefExpr(TIPParser::DeRefExprContext *ctx) override;
+  Any visitArrayLenExpr(TIPParser::ArrayLenExprContext *ctx) override;
   Any visitNullExpr(TIPParser::NullExprContext *ctx) override;
   Any visitRecordExpr(TIPParser::RecordExprContext *ctx) override;
   Any visitFieldExpr(TIPParser::FieldExprContext *ctx) override;

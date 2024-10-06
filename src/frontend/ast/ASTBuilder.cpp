@@ -349,6 +349,18 @@ Any ASTBuilder::visitRecordExpr(TIPParser::RecordExprContext *ctx) {
   return "";
 }
 
+Any ASTBuilder::visitArrayLenExpr(TIPParser::ArrayLenExprContext *ctx) {
+  visit(ctx->expr());
+  visitedExpr = std::make_shared<ASTArrayLenExpr>(visitedExpr);
+
+  LOG_S(1) << "Built AST node " << *visitedExpr;
+
+  // Set source location
+  visitedExpr->setLocation(ctx->getStart()->getLine(),
+                           ctx->getStart()->getCharPositionInLine());
+  return "";
+}
+
 Any ASTBuilder::visitFieldExpr(TIPParser::FieldExprContext *ctx) {
   std::string fName = ctx->IDENTIFIER()->getText();
   visit(ctx->expr());

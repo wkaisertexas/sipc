@@ -36,6 +36,7 @@ public:
   virtual void endVisit(ASTInputExpr *element) override;
   virtual void endVisit(ASTFunAppExpr *element) override;
   virtual void endVisit(ASTAllocExpr *element) override;
+  virtual void endVisit(ASTArrayLenExpr *element) override;
   virtual void endVisit(ASTRefExpr *element) override;
   virtual void endVisit(ASTDeRefExpr *element) override;
   virtual void endVisit(ASTNullExpr *element) override;
