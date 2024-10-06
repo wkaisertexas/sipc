@@ -236,6 +236,18 @@ Any ASTBuilder::visitNumExpr(TIPParser::NumExprContext *ctx) {
   return "";
 } // LCOV_EXCL_LINE
 
+Any ASTBuilder::visitBoolExpr(TIPParser::BoolExprContext *ctx) {
+  bool val = ctx->op->getText() == "true"; 
+  visitedExpr = std::make_shared<ASTBoolExpr>(val);
+
+  LOG_S(1) << "Built AST node " << *visitedExpr;
+
+  // Set source location
+  visitedExpr->setLocation(ctx->getStart()->getLine(),
+                           ctx->getStart()->getCharPositionInLine());
+  return "";
+}
+
 Any ASTBuilder::visitVarExpr(TIPParser::VarExprContext *ctx) {
   std::string name = ctx->IDENTIFIER()->getText();
   visitedExpr = std::make_shared<ASTVariableExpr>(name);

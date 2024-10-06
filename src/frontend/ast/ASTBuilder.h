@@ -60,6 +60,7 @@ public:
   Any visitFieldExpr(TIPParser::FieldExprContext *ctx) override;
   Any visitAccessExpr(TIPParser::AccessExprContext *ctx) override;
   Any visitDeclaration(TIPParser::DeclarationContext *ctx) override;
+  Any visitBoolExpr(TIPParser::BoolExprContext *ctx) override;
   Any visitNameDeclaration(TIPParser::NameDeclarationContext *ctx) override;
   Any visitAssignStmt(TIPParser::AssignStmtContext *ctx) override;
   Any visitBlockStmt(TIPParser::BlockStmtContext *ctx) override;

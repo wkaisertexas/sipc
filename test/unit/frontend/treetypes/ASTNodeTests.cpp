@@ -395,6 +395,21 @@ TEST_CASE("ASTNumberExprTest: Test methods of AST subtype.",
     REQUIRE(expr->getValue() == 13);
 }
 
+TEST_CASE("ASTBoolExprTest: Test methods of AST subtype.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo() {
+         return false;
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto expr = ASTHelper::find_node<ASTBoolExpr>(ast);
+
+    REQUIRE(!expr->getValue());
+}
+
 TEST_CASE("ASTOutputStmtTest: Test methods of AST subtype.",
           "[ASTNodes]") {
     std::stringstream stream;

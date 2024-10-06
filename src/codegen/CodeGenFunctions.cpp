@@ -422,6 +422,15 @@ llvm::Value *ASTNumberExpr::codegen() {
                                 getValue());
 } // LCOV_EXCL_LINE
 
+llvm::Value *ASTBoolExpr::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
+  
+  throw std::runtime_error("Boolean expression not implemented yet");
+
+  return llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext),
+                                getValue());
+} // LCOV_EXCL_LINE
+
 llvm::Value *ASTBinaryExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 

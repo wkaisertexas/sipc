@@ -1,4 +1,5 @@
 #include "PrettyPrinter.h"
+#include "ASTBoolExpr.h"
 
 #include <iostream>
 #include <sstream>
@@ -79,6 +80,10 @@ void PrettyPrinter::endVisit(ASTFunction *element) {
 
 void PrettyPrinter::endVisit(ASTNumberExpr *element) {
   visitResults.push_back(std::to_string(element->getValue()));
+}
+
+void PrettyPrinter::endVisit(ASTBoolExpr *element) {
+  visitResults.push_back(element->getValue() ? "true" : "false");
 }
 
 void PrettyPrinter::endVisit(ASTVariableExpr *element) {

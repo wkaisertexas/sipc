@@ -32,6 +32,7 @@ public:
   virtual bool visit(ASTFunction *element) override;
   virtual void endVisit(ASTFunction *element) override;
   virtual void endVisit(ASTNumberExpr *element) override;
+  virtual void endVisit(ASTBoolExpr *element) override;
   virtual void endVisit(ASTVariableExpr *element) override;
   virtual void endVisit(ASTBinaryExpr *element) override;
   virtual void endVisit(ASTInputExpr *element) override;
