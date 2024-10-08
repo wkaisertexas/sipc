@@ -230,3 +230,65 @@ TEST_CASE("ASTPrinterTest: ASTProgram output is the hash of the source.",
   actualOutput << *ast;
   REQUIRE(expectedOutput == actualOutput.str());
 }
+
+
+TEST_CASE("ASTPrinterTest: For loop item-iterator printer.", "[ASTNodePrint]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      for (i : y) {
+         x = x + i;
+      }
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTForStmt>(ast);
+
+   std::stringstream o;
+   o << *stmt;
+   REQUIRE(o.str() == "for (i : y) { x = (x+i); }");
+}
+
+
+TEST_CASE("ASTPrinterTest: For loop item-range printer.", "[ASTNodePrint]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      for (i : 1..10) {
+         x = x + i;
+      }
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTForStmt>(ast);
+   
+   std::stringstream o;
+   o << *stmt;
+   REQUIRE(o.str() == "for (i : 1..10) { x = (x+i); }");
+}
+
+TEST_CASE("ASTPrinterTest: For loop item-range-by printer.", "[ASTNodePrint]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      for (i : 1..10 by 2) {
+         x = x + i;
+      }
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTForStmt>(ast);
+   
+   std::stringstream o;
+   o << *stmt;
+   REQUIRE(o.str() == "for (i : 1..10 by 2) { x = (x+i); }");
+}
