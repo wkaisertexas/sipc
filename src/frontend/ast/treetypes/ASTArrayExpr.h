@@ -1,0 +1,18 @@
+#pragma once
+
+#include "ASTExpr.h"
+
+/*! \brief Class for boolean literals.
+ */
+class ASTArrayExpr : public ASTExpr {
+  std::vector<std::shared_ptr<ASTExpr>> ELEMENTS;
+
+public:
+  ASTArrayExpr(std::vector<std::shared_ptr<ASTExpr>> ELEMENTS) : ELEMENTS(ELEMENTS) {}
+  std::vector<std::shared_ptr<ASTExpr>> getElements() const { return ELEMENTS; }
+  void accept(ASTVisitor *visitor) override;
+  llvm::Value *codegen() override;
+
+protected:
+  std::ostream &print(std::ostream &out) const override;
+};

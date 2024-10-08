@@ -13,6 +13,8 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAllocExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTBoolExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTBoolExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayLenExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayLenExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAssignStmt.cpp

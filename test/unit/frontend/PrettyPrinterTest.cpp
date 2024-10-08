@@ -404,3 +404,26 @@ TEST_CASE("PrettyPrinter: Test for loops with range and increment", "[PrettyPrin
   expected = GeneralHelper::removeTrailingWhitespace(expected);
   REQUIRE(ppString == expected);
 }
+
+TEST_CASE("PrettyPrinter: Test arrays", "[PrettyPrinter]") {
+  std::stringstream stream;
+  stream << R"(prog(){var x,y,z;for(x : 1..10 by 2) { z = z + x; } return z;})";
+
+  std::string expected = R"(prog() 
+{
+  var x, y, z;
+  for (x : 1..10 by 2) 
+    {
+      z = (z + x);
+    }
+  return z;
+}
+)";
+
+  std::stringstream pp;
+  auto ast = ASTHelper::build_ast(stream);
+  PrettyPrinter::print(ast.get(), pp, ' ', 2);
+  std::string ppString = GeneralHelper::removeTrailingWhitespace(pp.str());
+  expected = GeneralHelper::removeTrailingWhitespace(expected);
+  REQUIRE(ppString == expected);
+}

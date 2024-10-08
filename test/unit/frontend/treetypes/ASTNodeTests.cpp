@@ -614,3 +614,31 @@ TEST_CASE("ASTForStmtTest: Test methods of AST subtype for item-range-by version
    o5 << *stmt->getIncrement();
    REQUIRE(o5.str() == "2");
 }
+
+
+TEST_CASE("ASTArrayExprTest: Test methods of AST subtype for arrays.", "[ASTNodes]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      x = [1, y, [a, b, c]]
+      return x;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTArrayExpr>(ast);
+   
+   std::stringstream o1;
+   o1 << *stmt->getElements()[0];
+   REQUIRE(o1.str() == "1");
+
+   std::stringstream o2;
+   o2 << *stmt->getElements()[1];
+   REQUIRE(o2.str() == "y");
+
+   std::stringstream o3;
+   o3 << *stmt->getElements()[2];
+   REQUIRE(o3.str() == "[a, b, c]");
+
+}

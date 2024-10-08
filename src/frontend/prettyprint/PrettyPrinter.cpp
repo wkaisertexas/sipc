@@ -139,6 +139,23 @@ void PrettyPrinter::endVisit(ASTDeRefExpr *element) {
   visitResults.push_back("*" + base);
 }
 
+void PrettyPrinter::endVisit(ASTArrayExpr *element) {
+  std::stringstream base;
+  base << "[";
+  int size = element->getElements().size();
+  for(int i = 0; i < size; i++) {
+    base << visitResults.back();
+    visitResults.pop_back();
+
+    if(i != size - 1) {
+      base << ", ";
+    }
+  }
+  base << "[";
+  
+  visitResults.push_back(base.str());
+}
+
 void PrettyPrinter::endVisit(ASTArrayLenExpr *element) {
   std::string base = visitResults.back();
   visitResults.pop_back();

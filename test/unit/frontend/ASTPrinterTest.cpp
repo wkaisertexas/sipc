@@ -292,3 +292,22 @@ TEST_CASE("ASTPrinterTest: For loop item-range-by printer.", "[ASTNodePrint]") {
    o << *stmt;
    REQUIRE(o.str() == "for (i : 1..10 by 2) { x = (x+i); }");
 }
+
+
+TEST_CASE("ASTPrinterTest: Array printer.", "[ASTNodePrint]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      y = [1, 2, 3, 4];
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTArrayExpr>(ast);
+   
+   std::stringstream o;
+   o << *stmt;
+   REQUIRE(o.str() == "[1, 2, 3, 4]");
+}
