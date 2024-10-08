@@ -227,6 +227,46 @@ void PrettyPrinter::endVisit(ASTWhileStmt *element) {
   visitResults.push_back(whileString);
 }
 
+bool PrettyPrinter::visit(ASTForStmt *element) {
+  indentLevel++;
+  return true;
+}
+
+void PrettyPrinter::endVisit(ASTForStmt *element) {
+  std::string bodyString = visitResults.back();
+  visitResults.pop_back();
+
+  std::string incrementString;
+  std::string iteratorString;
+
+  if (element->getIncrement()) {
+    incrementString = " by " + visitResults.back();
+    visitResults.pop_back();
+  }
+
+  if(element->getIterator()) {
+    iteratorString = visitResults.back();
+    visitResults.pop_back();
+  } else {
+    std::string rangeEnd = visitResults.back();
+    visitResults.pop_back();
+    std::string rangeStart = visitResults.back();
+    visitResults.pop_back();
+
+    iteratorString = rangeStart + ".." + rangeEnd;
+  }
+
+  std::string itemString = visitResults.back();
+  visitResults.pop_back();
+
+  indentLevel--;
+
+  std::string forString =
+      indent() + "for (" + itemString + " : " + iteratorString + incrementString + ") \n" + bodyString;
+  visitResults.push_back(forString);
+}
+
+
 bool PrettyPrinter::visit(ASTIfStmt *element) {
   indentLevel++;
   return true;

@@ -34,6 +34,8 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFieldExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFieldExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTForStmt.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTForStmt.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFunAppExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFunAppExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFunction.cpp

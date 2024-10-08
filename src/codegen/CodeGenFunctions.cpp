@@ -956,6 +956,16 @@ llvm::Value *ASTWhileStmt::codegen() {
   return irBuilder.CreateCall(nop);
 } // LCOV_EXCL_LINE
 
+llvm::Value *ASTForStmt::codegen(){
+    LOG_S(1) << "Generating code for " << *this;
+
+    llvm::Value *lastStmt = nullptr;
+
+    throw std::runtime_error("For statement not implemented yet"); 
+
+    return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+}
+
 /*
  * The code generated for an IfStmt looks like this:
  *

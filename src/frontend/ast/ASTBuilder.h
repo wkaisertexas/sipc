@@ -65,6 +65,7 @@ public:
   Any visitAssignStmt(TIPParser::AssignStmtContext *ctx) override;
   Any visitBlockStmt(TIPParser::BlockStmtContext *ctx) override;
   Any visitWhileStmt(TIPParser::WhileStmtContext *ctx) override;
+  Any visitForStmt(TIPParser::ForStmtContext *ctx) override;
   Any visitIfStmt(TIPParser::IfStmtContext *ctx) override;
   Any visitUpdateStmt(TIPParser::UpdateStmtContext *ctx) override;
   Any visitOutputStmt(TIPParser::OutputStmtContext *ctx) override;

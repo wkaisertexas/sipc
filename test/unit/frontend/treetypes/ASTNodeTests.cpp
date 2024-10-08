@@ -517,3 +517,100 @@ TEST_CASE("ASTWhileStmtTest: Test methods of AST subtype.",
     o2 << *stmt->getBody();
     REQUIRE(o2.str() == "{ x = (x-1); }");
 }
+
+TEST_CASE("ASTForStmtTest: Test methods of AST subtype for item-iterator version.", "[ASTNodes]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      for (i : y) {
+         x = x + i;
+      }
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTForStmt>(ast);
+   
+   std::stringstream o1;
+   o1 << *stmt->getBody();
+   REQUIRE(o1.str() == "{ x = (x+i); }");
+
+   std::stringstream o2;
+   o2 << *stmt->getItem();
+   REQUIRE(o2.str() == "i");
+
+   std::stringstream o3;
+   o3 << *stmt->getIterator();
+   REQUIRE(o3.str() == "y");
+}
+
+
+TEST_CASE("ASTForStmtTest: Test methods of AST subtype for item-range version.", "[ASTNodes]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      for (i : 1..10) {
+         x = x + i;
+      }
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTForStmt>(ast);
+   
+   std::stringstream o1;
+   o1 << *stmt->getBody();
+   REQUIRE(o1.str() == "{ x = (x+i); }");
+
+   std::stringstream o2;
+   o2 << *stmt->getItem();
+   REQUIRE(o2.str() == "i");
+
+   std::stringstream o3;
+   o3 << *stmt->getRangeStart();
+   REQUIRE(o3.str() == "1");
+
+   std::stringstream o4;
+   o4 << *stmt->getRangeEnd();
+   REQUIRE(o4.str() == "10");
+}
+
+TEST_CASE("ASTForStmtTest: Test methods of AST subtype for item-range-by version.", "[ASTNodes]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      for (i : 1..10 by 2) {
+         x = x + i;
+      }
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTForStmt>(ast);
+   
+   std::stringstream o1;
+   o1 << *stmt->getBody();
+   REQUIRE(o1.str() == "{ x = (x+i); }");
+
+   std::stringstream o2;
+   o2 << *stmt->getItem();
+   REQUIRE(o2.str() == "i");
+
+   std::stringstream o3;
+   o3 << *stmt->getRangeStart();
+   REQUIRE(o3.str() == "1");
+
+   std::stringstream o4;
+   o4 << *stmt->getRangeEnd();
+   REQUIRE(o4.str() == "10");
+
+   std::stringstream o5;      
+   o5 << *stmt->getIncrement();
+   REQUIRE(o5.str() == "2");
+}
