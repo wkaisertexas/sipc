@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ASTIndexingExpr.h"
 #include "ASTTernaryExpr.h"
 #include "ASTVisitor.h"
 #include <iostream>
@@ -34,6 +35,7 @@ public:
   virtual void endVisit(ASTNumberExpr *element) override;
   virtual void endVisit(ASTBoolExpr *element) override;
   virtual void endVisit(ASTVariableExpr *element) override;
+  virtual void endVisit(ASTIndexingExpr *element) override;
   virtual void endVisit(ASTBinaryExpr *element) override;
   virtual void endVisit(ASTInputExpr *element) override;
   virtual void endVisit(ASTFunAppExpr *element) override;

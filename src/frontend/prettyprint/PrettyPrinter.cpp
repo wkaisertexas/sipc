@@ -1,5 +1,6 @@
 #include "PrettyPrinter.h"
 #include "ASTBoolExpr.h"
+#include "ASTIndexingExpr.h"
 
 #include <iostream>
 #include <sstream>
@@ -137,6 +138,14 @@ void PrettyPrinter::endVisit(ASTDeRefExpr *element) {
   std::string base = visitResults.back();
   visitResults.pop_back();
   visitResults.push_back("*" + base);
+}
+
+void PrettyPrinter::endVisit(ASTIndexingExpr *element){
+  std::string index = visitResults.back();
+  visitResults.pop_back();
+  std::string base = visitResults.back();
+  visitResults.pop_back();
+  visitResults.push_back(base + "[" + index + "]");
 }
 
 void PrettyPrinter::endVisit(ASTArrayExpr *element) {

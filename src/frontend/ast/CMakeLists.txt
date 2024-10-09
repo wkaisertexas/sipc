@@ -9,6 +9,8 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/AST.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAccessExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAccessExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTIndexingExpr.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTIndexingExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAllocExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAllocExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTBoolExpr.cpp

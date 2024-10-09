@@ -37,6 +37,7 @@
 #include "ASTRefExpr.h"
 #include "ASTReturnStmt.h"
 #include "ASTStmt.h"
+#include "ASTIndexingExpr.h"
 #include "ASTVariableExpr.h"
 #include "ASTWhileStmt.h"
 #include "ASTBoolExpr.h"

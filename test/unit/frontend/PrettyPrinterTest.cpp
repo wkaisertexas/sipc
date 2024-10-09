@@ -177,6 +177,27 @@ prog() { var x, y, z; output x+y; return z; })";
   REQUIRE(ppString == expected);
 }
 
+TEST_CASE("PrettyPrinter: Array Indexing", "[PrettyPrinter]") {
+  std::stringstream stream;
+  stream << R"(// comment
+prog() { var x, y, z; output x [2]; return z; })";
+
+  std::string expected = R"(prog() 
+{
+  var x, y, z;
+  output x[2];
+  return z;
+}
+)";
+
+  std::stringstream pp;
+  auto ast = ASTHelper::build_ast(stream);
+  PrettyPrinter::print(ast.get(), pp, ' ', 2);
+  std::string ppString = GeneralHelper::removeTrailingWhitespace(pp.str());
+  expected = GeneralHelper::removeTrailingWhitespace(expected);
+  REQUIRE(ppString == expected);
+}
+
 TEST_CASE("PrettyPrinter: Test embedded comment removal", "[PrettyPrinter]") {
   std::stringstream stream;
   stream << R"(prog() { var x, /* comment */ y, z; output x+y; return z; })";

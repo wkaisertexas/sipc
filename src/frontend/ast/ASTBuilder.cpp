@@ -248,6 +248,23 @@ Any ASTBuilder::visitBoolExpr(TIPParser::BoolExprContext *ctx) {
   return "";
 }
 
+Any ASTBuilder::visitArrayIndexingExpr(TIPParser::ArrayIndexingExprContext *ctx) {
+  visit(ctx->expr(0));
+  auto arr = visitedExpr;
+
+  visit(ctx->expr(1));
+  auto idx = visitedExpr;
+
+  visitedExpr = std::make_shared<ASTIndexingExpr>(arr, idx);
+
+  LOG_S(1) << "Built AST node " << *visitedExpr;
+
+  // Set source location
+  visitedExpr->setLocation(ctx->getStart()->getLine(),
+                           ctx->getStart()->getCharPositionInLine());
+  return "";
+}
+
 Any ASTBuilder::visitVarExpr(TIPParser::VarExprContext *ctx) {
   std::string name = ctx->IDENTIFIER()->getText();
   visitedExpr = std::make_shared<ASTVariableExpr>(name);

@@ -216,6 +216,24 @@ TEST_CASE("ASTDerefExprTest: Test methods of AST subtype.",
     REQUIRE(o1.str() == "(*p)");
 }
 
+TEST_CASE("ASTIndexingExprTest: Test methods of the AST subtype.", "[ASTNodes]") {
+   std::stringstream stream;
+   stream << R"(
+      foo(p) {
+         return p[1];
+      }
+    )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto expr = ASTHelper::find_node<ASTIndexingExpr>(ast);
+
+   std::stringstream o1, o2;
+   o1 << *expr->getArr();
+   REQUIRE(o1.str() == "p");
+   o2 << *expr->getIdx();
+   REQUIRE(o2.str() == "1");
+}
+
 TEST_CASE("ASTErrorStmtTest: Test methods of AST subtype.",
           "[ASTNodes]") {
     std::stringstream stream;
