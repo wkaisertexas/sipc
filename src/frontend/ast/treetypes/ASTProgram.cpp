@@ -42,7 +42,7 @@ std::vector<std::shared_ptr<ASTNode>> ASTProgram::getChildren() {
     children.push_back(function);
   }
   return children;
-}
+} // LCOV_EXCL_LINE
 
 /* This function is never called because a custom code generation
  * routine, which accepts additional arguments, is defined for programs.

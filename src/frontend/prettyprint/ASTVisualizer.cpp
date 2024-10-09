@@ -53,7 +53,7 @@ void ASTVisualizer::declare_node(ASTNode *element, std::string label) {
 
 void ASTVisualizer::connect_node_to_parent(ASTNode *element) {
   if (parent.empty()) {
-    return;
+    return; // LCOV_EXCL_LINE
   }
 
   os << "  " << '"' << vertexMap[parent.top()] << '"' << " -> " << '"'

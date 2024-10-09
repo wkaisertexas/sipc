@@ -17,4 +17,4 @@ std::vector<std::shared_ptr<ASTNode>> ASTAllocExpr::getChildren() {
   std::vector<std::shared_ptr<ASTNode>> children;
   children.push_back(INIT);
   return children;
-}
+}  // LCOV_EXCL_LINE

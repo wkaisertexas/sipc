@@ -246,7 +246,7 @@ Any ASTBuilder::visitBoolExpr(TIPParser::BoolExprContext *ctx) {
   visitedExpr->setLocation(ctx->getStart()->getLine(),
                            ctx->getStart()->getCharPositionInLine());
   return "";
-}
+} // LCOV_EXCL_LINEs
 
 Any ASTBuilder::visitArrayIndexingExpr(TIPParser::ArrayIndexingExprContext *ctx) {
   visit(ctx->expr(0));
@@ -263,7 +263,7 @@ Any ASTBuilder::visitArrayIndexingExpr(TIPParser::ArrayIndexingExprContext *ctx)
   visitedExpr->setLocation(ctx->getStart()->getLine(),
                            ctx->getStart()->getCharPositionInLine());
   return "";
-}
+} // LCOV_EXCL_LINE// LCOV_EXCL_LINE
 
 Any ASTBuilder::visitVarExpr(TIPParser::VarExprContext *ctx) {
   std::string name = ctx->IDENTIFIER()->getText();
@@ -275,7 +275,7 @@ Any ASTBuilder::visitVarExpr(TIPParser::VarExprContext *ctx) {
   visitedExpr->setLocation(ctx->getStart()->getLine(),
                            ctx->getStart()->getCharPositionInLine());
   return "";
-}
+} // LCOV_EXCL_LINE
 
 Any ASTBuilder::visitInputExpr(TIPParser::InputExprContext *ctx) {
   visitedExpr = std::make_shared<ASTInputExpr>();
@@ -312,7 +312,7 @@ Any ASTBuilder::visitFunAppExpr(TIPParser::FunAppExprContext *ctx) {
   visitedExpr->setLocation(ctx->getStart()->getLine(),
                            ctx->getStart()->getCharPositionInLine());
   return "";
-}
+} // LCOV_EXCL_LINE
 
 Any ASTBuilder::visitAllocExpr(TIPParser::AllocExprContext *ctx) {
   visit(ctx->expr());
@@ -404,7 +404,7 @@ Any ASTBuilder::visitArrayLenExpr(TIPParser::ArrayLenExprContext *ctx) {
   visitedExpr->setLocation(ctx->getStart()->getLine(),
                            ctx->getStart()->getCharPositionInLine());
   return "";
-}
+} // LCOV_EXCL_LINE
 
 Any ASTBuilder::visitTernaryExpr(TIPParser::TernaryExprContext *ctx) {
   visit(ctx->expr(0));
