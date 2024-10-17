@@ -407,16 +407,13 @@ TEST_CASE("PrettyPrinter: Test for loops with range and increment", "[PrettyPrin
 
 TEST_CASE("PrettyPrinter: Test arrays", "[PrettyPrinter]") {
   std::stringstream stream;
-  stream << R"(prog(){var x,y,z;for(x : 1..10 by 2) { z = z + x; } return z;})";
+  stream << R"(prog(){var x; x=[1,2,3,4];return x;})";
 
   std::string expected = R"(prog() 
 {
-  var x, y, z;
-  for (x : 1..10 by 2) 
-    {
-      z = (z + x);
-    }
-  return z;
+  var x;
+  x = [1, 2, 3, 4];
+  return x;
 }
 )";
 
