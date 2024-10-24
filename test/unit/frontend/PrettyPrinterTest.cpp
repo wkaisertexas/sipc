@@ -28,12 +28,37 @@ TEST_CASE("PrettyPrinter: Test default constructor", "[PrettyPrinter]") {
 
 TEST_CASE("PrettyPrinter: Test Array Length", "[PrettyPrinter]") {
   std::stringstream stream;
-  stream << R"(prog() { var x,y; y = #x; return 0; })";
+  stream << R"(prog() { var x,y; y = #x; x = &y; return 0; })";
 
   std::string expected = R"(prog() 
 {
   var x, y;
   y = #x;
+  x = &y;
+  return 0;
+}
+)";
+
+  std::stringstream pp;
+  auto ast = ASTHelper::build_ast(stream);
+  PrettyPrinter::print(ast.get(), pp, ' ', 2);
+  std::string ppString = GeneralHelper::removeTrailingWhitespace(pp.str());
+  expected = GeneralHelper::removeTrailingWhitespace(expected);
+  REQUIRE(ppString == expected);
+}
+
+TEST_CASE("PrettyPrinter: Test Record Length", "[PrettyPrinter]") {
+  std::stringstream stream;
+  stream << R"(prog() { var x,y; y = {a: 2, b:2}; if(y.a <= 5) {error (5 < 1) ? 1: 0;} return 0; })";
+
+  std::string expected = R"(prog() 
+{
+  var x, y;
+  y = {a:2, b:2};
+  if ((y.a <= 5))
+    {
+      error (5 < 1) ? 1 : 0;
+    }
   return 0;
 }
 )";
@@ -177,6 +202,27 @@ prog() { var x, y, z; output x+y; return z; })";
   REQUIRE(ppString == expected);
 }
 
+TEST_CASE("PrettyPrinter: Array Indexing", "[PrettyPrinter]") {
+  std::stringstream stream;
+  stream << R"(// comment
+prog() { var x, y, z; output x [2]; return z; })";
+
+  std::string expected = R"(prog() 
+{
+  var x, y, z;
+  output x[2];
+  return z;
+}
+)";
+
+  std::stringstream pp;
+  auto ast = ASTHelper::build_ast(stream);
+  PrettyPrinter::print(ast.get(), pp, ' ', 2);
+  std::string ppString = GeneralHelper::removeTrailingWhitespace(pp.str());
+  expected = GeneralHelper::removeTrailingWhitespace(expected);
+  REQUIRE(ppString == expected);
+}
+
 TEST_CASE("PrettyPrinter: Test embedded comment removal", "[PrettyPrinter]") {
   std::stringstream stream;
   stream << R"(prog() { var x, /* comment */ y, z; output x+y; return z; })";
@@ -249,11 +295,12 @@ TEST_CASE("PrettyPrinter: Test nested if print", "[PrettyPrinter]") {
 
 TEST_CASE("PrettyPrinter: Test Update Stmt", "[PrettyPrinter]") {
   std::stringstream stream;
-  stream << R"(prog() { var x; x++; return 0; })";
+  stream << R"(prog() { var x,y; y--; x++; return 0; })";
 
   std::string expected = R"(prog() 
 {
-  var x;
+  var x, y;
+  y--;
   x++;
   return 0;
 }
@@ -269,12 +316,12 @@ TEST_CASE("PrettyPrinter: Test Update Stmt", "[PrettyPrinter]") {
 
 TEST_CASE("PrettyPrinter: Test paren expr", "[PrettyPrinter]") {
   std::stringstream stream;
-  stream << R"(prog() { var x, y; x = y * 3 + 4 - y; return 0; })";
+  stream << R"(prog() { var x, y; x = y * 3 % 4 + 4 - y; return 0; })";
 
   std::string expected = R"(prog() 
 {
   var x, y;
-  x = (((y * 3) + 4) - y);
+  x = ((((y * 3) % 4) + 4) - y);
   return 0;
 }
 )";
@@ -314,17 +361,17 @@ TEST_CASE("PrettyPrinter: Test while spacing", "[PrettyPrinter]") {
 TEST_CASE("PrettyPrinter: Test funs and calls", "[PrettyPrinter]") {
   std::stringstream stream;
   stream
-      << R"(fun(a){return a+1;}main() {output fun(9); return fun(1) + fun(2);})";
+      << R"(fun(a,b){return a+b+1;}main() {output fun(9,1); return fun(1,1) + fun(2,1);})";
 
-  std::string expected = R"(fun(a) 
+  std::string expected = R"(fun(a, b) 
 {
-  return (a + 1);
+  return ((a + b) + 1);
 }
 
 main()        
 {
-  output fun(9);
-  return (fun(1) + fun(2));
+  output fun(9, 1);
+  return (fun(1, 1) + fun(2, 1));
 }
 )";
 
@@ -407,6 +454,7 @@ TEST_CASE("PrettyPrinter: Test for loops with range and increment", "[PrettyPrin
 
 TEST_CASE("PrettyPrinter: Test arrays", "[PrettyPrinter]") {
   std::stringstream stream;
+<<<<<<< HEAD
   stream << R"(prog(){var x; x=[1,2,3,4];return x;})";
 
   std::string expected = R"(prog() 
@@ -414,6 +462,19 @@ TEST_CASE("PrettyPrinter: Test arrays", "[PrettyPrinter]") {
   var x;
   x = [1, 2, 3, 4];
   return x;
+=======
+  stream << R"(prog(){var x,y,z;for(x : 1..10 by 2) { z = z + x; }, y = [1, 2, 3, 4, 5]; return z;})";
+
+  std::string expected = R"(prog() 
+{
+  var x, y, z;
+  for (x : 1..10 by 2) 
+    {
+      z = (z + x);
+    }
+  y = [1, 2, 3, 4, 5];
+  return z;
+>>>>>>> d6c21cca39be40fe9193eb18029a48143a90cf93
 }
 )";
 

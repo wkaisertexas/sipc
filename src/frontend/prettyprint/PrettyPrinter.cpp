@@ -1,5 +1,6 @@
 #include "PrettyPrinter.h"
 #include "ASTBoolExpr.h"
+#include "ASTIndexingExpr.h"
 
 #include <iostream>
 #include <sstream>
@@ -32,7 +33,7 @@ std::string joinWithDelim(std::vector<std::string> &visitResults,
   visitResults.erase(visitResults.begin() + visitResults.size() - sz,
                      visitResults.end());
   return out;
-}
+} // LCOV_EXCL_LINE
 
 void PrettyPrinter::endVisit(ASTProgram *element) {
   os << joinWithDelim(visitResults, "\n", element->getFunctions().size(), 1);
@@ -139,19 +140,30 @@ void PrettyPrinter::endVisit(ASTDeRefExpr *element) {
   visitResults.push_back("*" + base);
 }
 
+void PrettyPrinter::endVisit(ASTIndexingExpr *element){
+  std::string index = visitResults.back();
+  visitResults.pop_back();
+  std::string base = visitResults.back();
+  visitResults.pop_back();
+  visitResults.push_back(base + "[" + index + "]");
+}
+
 void PrettyPrinter::endVisit(ASTArrayExpr *element) {
   std::stringstream base;
   base << "[";
   int size = element->getElements().size();
   for(int i = 0; i < size; i++) {
-    base << visitResults.back();
-    visitResults.pop_back();
+    base << visitResults[visitResults.size() - size + i];
 
     if(i != size - 1) {
       base << ", ";
     }
   }
-  base << "[";
+  base << "]";
+
+  for(int i = 0; i < size; i++) {
+    visitResults.pop_back();
+  }
   
   visitResults.push_back(base.str());
 }
