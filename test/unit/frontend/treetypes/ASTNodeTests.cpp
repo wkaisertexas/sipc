@@ -58,6 +58,7 @@ TEST_CASE("ASTArrayLenExpr: Test methods of AST subtype.",
     std::stringstream o1;
     o1 << *expr;
     REQUIRE(o1.str() == "(#p)");
+    REQUIRE(expr->getChildren().size() == 1);
 }
 
 TEST_CASE("ASTTernaryExpr: Test methods of AST subtype.",
@@ -79,6 +80,8 @@ TEST_CASE("ASTTernaryExpr: Test methods of AST subtype.",
    REQUIRE(o2.str() == "1");
    o3 << *expr->getElse();
    REQUIRE(o3.str() == "0");
+
+   REQUIRE(expr->getChildren().size() == 3);
 }
 
 TEST_CASE("ASTAssignStmtTest: Test methods of AST subtype.",
@@ -151,7 +154,7 @@ TEST_CASE("ASTBlockStmtTest: Test methods of AST subtype.",
     REQUIRE(stmts.size() == 2);
 }
 
-TEST_CASE("ASTUpdateStmtTest: Test methods of AST subtype.",
+TEST_CASE("ASTUpdateStmtTest: Test increment.",
           "[ASTNodes]") {
     std::stringstream stream;
     stream << R"(
@@ -169,6 +172,30 @@ TEST_CASE("ASTUpdateStmtTest: Test methods of AST subtype.",
    REQUIRE(stmt->getIncrement() == true);
    REQUIRE(arg != nullptr);
    REQUIRE(arg->getName() == "x");
+
+   REQUIRE(stmt->getChildren().size() == 1);
+}
+
+TEST_CASE("ASTUpdateStmtTest: Test decrement.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo() {
+         var x;
+         x--;
+         return x+1;
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto stmt = ASTHelper::find_node<ASTUpdateStmt>(ast);
+    auto arg = dynamic_cast<ASTVariableExpr*>(stmt->getArg());
+
+   REQUIRE(stmt->getIncrement() == false);
+   REQUIRE(arg != nullptr);
+   REQUIRE(arg->getName() == "x");
+
+   REQUIRE(stmt->getChildren().size() == 1);
 }
 
 TEST_CASE("ASTDeclNodeTest: Test methods of AST subtype.",
@@ -237,6 +264,8 @@ TEST_CASE("ASTIndexingExprTest: Test methods of the AST subtype.", "[ASTNodes]")
    REQUIRE(o1.str() == "p");
    o2 << *expr->getIdx();
    REQUIRE(o2.str() == "1");
+
+   REQUIRE(expr->getChildren().size() == 2);
 }
 
 TEST_CASE("ASTErrorStmtTest: Test methods of AST subtype.",
@@ -418,7 +447,22 @@ TEST_CASE("ASTNumberExprTest: Test methods of AST subtype.",
     REQUIRE(expr->getValue() == 13);
 }
 
-TEST_CASE("ASTBoolExprTest: Test methods of AST subtype.",
+TEST_CASE("ASTBoolExprTest: Test true.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo() {
+         return true;
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto expr = ASTHelper::find_node<ASTBoolExpr>(ast);
+
+    REQUIRE(expr->getValue());
+}
+
+TEST_CASE("ASTBoolExprTest: Test false",
           "[ASTNodes]") {
     std::stringstream stream;
     stream << R"(
@@ -567,6 +611,8 @@ TEST_CASE("ASTForStmtTest: Test methods of AST subtype for item-iterator version
    std::stringstream o3;
    o3 << *stmt->getIterator();
    REQUIRE(o3.str() == "y");
+
+   REQUIRE(stmt->getChildren().size() == 3);
 }
 
 TEST_CASE("ASTForStmtTest: Test methods of AST array of expr", "[ASTNodes]") {
@@ -618,6 +664,8 @@ TEST_CASE("ASTForStmtTest: Test methods of AST subtype for item-range version.",
    std::stringstream o4;
    o4 << *stmt->getRangeEnd();
    REQUIRE(o4.str() == "10");
+
+   REQUIRE(stmt->getChildren().size() == 4);
 }
 
 TEST_CASE("ASTForStmtTest: Test methods of AST subtype for item-range-by version.", "[ASTNodes]") {
@@ -654,6 +702,8 @@ TEST_CASE("ASTForStmtTest: Test methods of AST subtype for item-range-by version
    std::stringstream o5;      
    o5 << *stmt->getIncrement();
    REQUIRE(o5.str() == "2");
+
+   REQUIRE(stmt->getChildren().size() == 5);
 }
 
 
@@ -668,18 +718,20 @@ TEST_CASE("ASTArrayExprTest: Test methods of AST subtype for arrays.", "[ASTNode
    )";
 
    auto ast = ASTHelper::build_ast(stream);
-   auto stmt = ASTHelper::find_node<ASTArrayExpr>(ast);
+   auto expr = ASTHelper::find_node<ASTArrayExpr>(ast);
    
    std::stringstream o1;
-   o1 << *stmt->getElements()[0];
+   o1 << *expr->getElements()[0];
    REQUIRE(o1.str() == "1");
 
    std::stringstream o2;
-   o2 << *stmt->getElements()[1];
+   o2 << *expr->getElements()[1];
    REQUIRE(o2.str() == "y");
 
    std::stringstream o3;
-   o3 << *stmt->getElements()[2];
+   o3 << *expr->getElements()[2];
    REQUIRE(o3.str() == "[a, b, c]");
+
+   REQUIRE(expr->getChildren().size() == 3);
 
 }

@@ -25,3 +25,11 @@ std::ostream &ASTArrayExpr::print(std::ostream &out) const {
 
   return out;
 }
+
+std::vector<std::shared_ptr<ASTNode>> ASTArrayExpr::getChildren() {
+  std::vector<std::shared_ptr<ASTNode>> children;
+  for(int i = 0; i < this->ELEMENTS.size(); i++) {
+    children.push_back(this->ELEMENTS[i]);
+  }
+  return children;
+}  // LCOV_EXCL_LINE

@@ -314,6 +314,28 @@ TEST_CASE("PrettyPrinter: Test Update Stmt", "[PrettyPrinter]") {
   REQUIRE(ppString == expected);
 }
 
+TEST_CASE("PrettyPrinter: Test Bool Expr", "[PrettyPrinter]") {
+  std::stringstream stream;
+  stream << R"(prog() { var x,y; y=true; x=false; return 0; })";
+
+  std::string expected = R"(prog() 
+{
+  var x, y;
+  y = true;
+  x = false;
+  return 0;
+}
+)";
+
+  std::stringstream pp;
+  auto ast = ASTHelper::build_ast(stream);
+  PrettyPrinter::print(ast.get(), pp, ' ', 2);
+  std::string ppString = GeneralHelper::removeTrailingWhitespace(pp.str());
+  expected = GeneralHelper::removeTrailingWhitespace(expected);
+  REQUIRE(ppString == expected);
+}
+
+
 TEST_CASE("PrettyPrinter: Test paren expr", "[PrettyPrinter]") {
   std::stringstream stream;
   stream << R"(prog() { var x, y; x = y * 3 % 4 + 4 - y; return 0; })";
@@ -336,12 +358,12 @@ TEST_CASE("PrettyPrinter: Test paren expr", "[PrettyPrinter]") {
 
 TEST_CASE("PrettyPrinter: Test while spacing", "[PrettyPrinter]") {
   std::stringstream stream;
-  stream << R"(prog(){var x,y;while(y>0){x=x+y;y=y-1;}return x;})";
+  stream << R"(prog(){var x,y;while(y>=0){x=x+y;y=y-1;}return x;})";
 
   std::string expected = R"(prog() 
 {
   var x, y;
-  while ((y > 0)) 
+  while ((y >= 0)) 
     {
       x = (x + y);
       y = (y - 1);

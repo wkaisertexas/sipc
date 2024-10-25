@@ -64,6 +64,8 @@ TEST_CASE("ASTPrinterTest: statement printers", "[ASTNodePrint]") {
            x = y + z; 
            y = 13;
         } 
+        x++;
+        y--;
         error       z;
         return z;
       }
@@ -75,6 +77,8 @@ TEST_CASE("ASTPrinterTest: statement printers", "[ASTNodePrint]") {
                                     "if ((y==z)) y = 1; else y = 2;",
                                     "while ((x==0)) z = 0;",
                                     "{ x = (y+z); y = 13; }",
+                                    "x++;",
+                                    "y--;",
                                     "error z;",
                                     "return z;"};
 
@@ -115,6 +119,12 @@ TEST_CASE("ASTPrinterTest: expression printers", "[ASTNodePrint]") {
         x = alloc null;
         y = x + y - z * 3 / 1;
         y = foo(x);
+        x = true;
+        y = false;
+        z = x ? 1 : 0;
+        x = [1, 2, 3, 4, 5];
+        z = x[1];
+        z = #x;
         return 0;
       }
     )";
@@ -129,7 +139,13 @@ TEST_CASE("ASTPrinterTest: expression printers", "[ASTNodePrint]") {
                                     "42",
                                     "alloc null",
                                     "((x+y)-((z*3)/1))",
-                                    "foo(x)"};
+                                    "foo(x)",
+                                    "true",
+                                    "false",
+                                    "x ? 1 : 0",
+                                    "[1, 2, 3, 4, 5]",
+                                    "x[1]",
+                                    "(#x)"};
 
   auto ast = ASTHelper::build_ast(stream);
 
@@ -196,6 +212,7 @@ TEST_CASE("ASTPrinterTest: local expr test", "[ASTNodePrint]") {
 TEST_CASE("ASTPrinterTest: local unique expr test", "[ASTNodePrint]") {
   auto zero = std::make_shared<ASTNumberExpr>(0);
   auto var = std::make_shared<ASTVariableExpr>("y");
+  std::cout << "here";
 
   // Here we create a shared pointer to the binary expr
   auto ypluszero =
