@@ -17,7 +17,7 @@ Iterator Iterator::operator++(int) {
   Iterator cloned(iteratorImpl->clone());
   ++(*iteratorImpl);
   return cloned;
-}
+} // LCOV_EXCL_LINE
 
 SyntaxTree *Iterator::operator->() { return iteratorImpl->operator->(); }
 
@@ -33,4 +33,4 @@ bool Iterator::operator!=(const Iterator &rhs) { return !(*this == rhs); }
 
 SyntaxTree const &Iterator::get_tree() const {
   return iteratorImpl->get_tree();
-}
+} // LCOV_EXCL_LINE

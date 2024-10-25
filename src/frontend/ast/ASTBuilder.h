@@ -43,8 +43,7 @@ public:
   Any visitNegNumber(TIPParser::NegNumberContext *ctx) override;
   Any visitAdditiveExpr(TIPParser::AdditiveExprContext *ctx) override;
   Any visitRelationalExpr(TIPParser::RelationalExprContext *ctx) override;
-  Any visitMultiplicativeExpr(
-      TIPParser::MultiplicativeExprContext *ctx) override;
+  Any visitMultiplicativeExpr(TIPParser::MultiplicativeExprContext *ctx) override;
   Any visitEqualityExpr(TIPParser::EqualityExprContext *ctx) override;
   Any visitParenExpr(TIPParser::ParenExprContext *ctx) override;
   Any visitNumExpr(TIPParser::NumExprContext *ctx) override;
@@ -54,16 +53,24 @@ public:
   Any visitAllocExpr(TIPParser::AllocExprContext *ctx) override;
   Any visitRefExpr(TIPParser::RefExprContext *ctx) override;
   Any visitDeRefExpr(TIPParser::DeRefExprContext *ctx) override;
+  Any visitArrayIndexingExpr(TIPParser::ArrayIndexingExprContext *ctx) override;
+  Any visitTernaryExpr(TIPParser::TernaryExprContext *ctx) override;
+  Any visitArrayLiteral(TIPParser::ArrayLiteralContext *ctx) override;
+  Any visitArrayLenExpr(TIPParser::ArrayLenExprContext *ctx) override;
+  Any visitArrayOfExpr(TIPParser::ArrayOfExprContext *ctx) override;
   Any visitNullExpr(TIPParser::NullExprContext *ctx) override;
   Any visitRecordExpr(TIPParser::RecordExprContext *ctx) override;
   Any visitFieldExpr(TIPParser::FieldExprContext *ctx) override;
   Any visitAccessExpr(TIPParser::AccessExprContext *ctx) override;
   Any visitDeclaration(TIPParser::DeclarationContext *ctx) override;
+  Any visitBoolExpr(TIPParser::BoolExprContext *ctx) override;
   Any visitNameDeclaration(TIPParser::NameDeclarationContext *ctx) override;
   Any visitAssignStmt(TIPParser::AssignStmtContext *ctx) override;
   Any visitBlockStmt(TIPParser::BlockStmtContext *ctx) override;
   Any visitWhileStmt(TIPParser::WhileStmtContext *ctx) override;
+  Any visitForStmt(TIPParser::ForStmtContext *ctx) override;
   Any visitIfStmt(TIPParser::IfStmtContext *ctx) override;
+  Any visitUpdateStmt(TIPParser::UpdateStmtContext *ctx) override;
   Any visitOutputStmt(TIPParser::OutputStmtContext *ctx) override;
   Any visitErrorStmt(TIPParser::ErrorStmtContext *ctx) override;
   Any visitReturnStmt(TIPParser::ReturnStmtContext *ctx) override;

@@ -1,3 +1,4 @@
+#include "ASTArrayOfExpr.h"
 #include "ASTHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
@@ -63,6 +64,8 @@ TEST_CASE("ASTPrinterTest: statement printers", "[ASTNodePrint]") {
            x = y + z; 
            y = 13;
         } 
+        x++;
+        y--;
         error       z;
         return z;
       }
@@ -74,6 +77,8 @@ TEST_CASE("ASTPrinterTest: statement printers", "[ASTNodePrint]") {
                                     "if ((y==z)) y = 1; else y = 2;",
                                     "while ((x==0)) z = 0;",
                                     "{ x = (y+z); y = 13; }",
+                                    "x++;",
+                                    "y--;",
                                     "error z;",
                                     "return z;"};
 
@@ -114,6 +119,12 @@ TEST_CASE("ASTPrinterTest: expression printers", "[ASTNodePrint]") {
         x = alloc null;
         y = x + y - z * 3 / 1;
         y = foo(x);
+        x = true;
+        y = false;
+        z = x ? 1 : 0;
+        x = [1, 2, 3, 4, 5];
+        z = x[1];
+        z = #x;
         return 0;
       }
     )";
@@ -128,7 +139,13 @@ TEST_CASE("ASTPrinterTest: expression printers", "[ASTNodePrint]") {
                                     "42",
                                     "alloc null",
                                     "((x+y)-((z*3)/1))",
-                                    "foo(x)"};
+                                    "foo(x)",
+                                    "true",
+                                    "false",
+                                    "x ? 1 : 0",
+                                    "[1, 2, 3, 4, 5]",
+                                    "x[1]",
+                                    "(#x)"};
 
   auto ast = ASTHelper::build_ast(stream);
 
@@ -229,4 +246,91 @@ TEST_CASE("ASTPrinterTest: ASTProgram output is the hash of the source.",
   std::stringstream actualOutput;
   actualOutput << *ast;
   REQUIRE(expectedOutput == actualOutput.str());
+}
+
+
+TEST_CASE("ASTPrinterTest: For loop item-iterator printer.", "[ASTNodePrint]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      for (i : y) {
+         x = x + i;
+      }
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTForStmt>(ast);
+
+   std::stringstream o;
+   o << *stmt;
+   REQUIRE(o.str() == "for (i : y) { x = (x+i); }");
+}
+
+
+TEST_CASE("ASTPrinterTest: For loop item-range printer.", "[ASTNodePrint]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      for (i : 1..10) {
+         x = x + i;
+      }
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTForStmt>(ast);
+   
+   std::stringstream o;
+   o << *stmt;
+   REQUIRE(o.str() == "for (i : 1..10) { x = (x+i); }");
+}
+
+TEST_CASE("ASTPrinterTest: For loop item-range-by printer.", "[ASTNodePrint]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      for (i : 1..10 by 2) {
+         x = x + i;
+      }
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTForStmt>(ast);
+   
+   std::stringstream o;
+   o << *stmt;
+   REQUIRE(o.str() == "for (i : 1..10 by 2) { x = (x+i); }");
+}
+
+
+TEST_CASE("ASTPrinterTest: Array printer.", "[ASTNodePrint]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      y = [1, 2, 3, 4];
+      x = [1 of 2];
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTArrayExpr>(ast);
+   auto x_stmt = ASTHelper::find_node<ASTArrayOfExpr>(ast);
+   
+   std::stringstream o;
+   o << *stmt;
+   REQUIRE(o.str() == "[1, 2, 3, 4]");
+
+    o = std::stringstream();
+    o << *x_stmt;
+    REQUIRE(o.str() == "[1 of 2]");
 }

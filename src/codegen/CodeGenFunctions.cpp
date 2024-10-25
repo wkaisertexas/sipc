@@ -1,4 +1,3 @@
-
 #include <ASTDeclNode.h>
 
 #include "AST.h"
@@ -423,6 +422,31 @@ llvm::Value *ASTNumberExpr::codegen() {
                                 getValue());
 } // LCOV_EXCL_LINE
 
+llvm::Value *ASTBoolExpr::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
+  
+  throw std::runtime_error("Boolean expression not implemented yet");
+
+  return llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext),
+                                getValue());
+} // LCOV_EXCL_LINE
+
+llvm::Value *ASTArrayOfExpr::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
+
+  throw std::runtime_error("Array of expression not implemented yet");
+
+  return nullptr;
+} // LCOV_EXCL_LINE
+
+llvm::Value *ASTIndexingExpr::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
+  
+  throw std::runtime_error("AST indexing expression not implemented yet");
+
+  return nullptr;
+} // LCOV_EXCL_LINE
+
 llvm::Value *ASTBinaryExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
@@ -651,6 +675,39 @@ llvm::Value *ASTDeRefExpr::codegen() {
   }
 }
 
+llvm::Value *ASTArrayExpr::codegen() {
+  // LOG_S(1) << "Generating code for " << *this;
+  
+  throw std::runtime_error("Array expression not implemented yet"); 
+
+  return nullptr;  
+}
+
+/* '#' array length expression
+ *  
+ * Generates the code for the length of an array
+ */
+llvm::Value *ASTArrayLenExpr::codegen() {
+  // LOG_S(1) << "Generating code for " << *this;
+  
+  throw std::runtime_error("Array length expression not implemented yet"); 
+
+  return nullptr;  
+}
+
+/* 
+ * Ternary expression code generation
+ *
+ * Generates a value from a ternary expression conditional
+ */
+llvm::Value *ASTTernaryExpr::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
+
+  throw std::runtime_error("Ternary expression not implemented yet");
+
+  return nullptr;
+}
+
 /* {field1 : val1, ..., fieldN : valN} record expression
  *
  * Builds an instance of the GlobalRecord using the declared fields
@@ -834,6 +891,16 @@ llvm::Value *ASTBlockStmt::codegen() {
   return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
 } // LCOV_EXCL_LINE
 
+llvm::Value *ASTUpdateStmt::codegen(){
+    LOG_S(1) << "Generating code for " << *this;
+
+    llvm::Value *lastStmt = nullptr;
+
+    throw std::runtime_error("Update statement not implemented yet"); 
+
+    return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+}
+
 /*
  * The code generated for an WhileStmt looks like this:
  *
@@ -912,6 +979,16 @@ llvm::Value *ASTWhileStmt::codegen() {
   irBuilder.SetInsertPoint(ExitBB);
   return irBuilder.CreateCall(nop);
 } // LCOV_EXCL_LINE
+
+llvm::Value *ASTForStmt::codegen(){
+    LOG_S(1) << "Generating code for " << *this;
+
+    llvm::Value *lastStmt = nullptr;
+
+    throw std::runtime_error("For statement not implemented yet"); 
+
+    return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+}
 
 /*
  * The code generated for an IfStmt looks like this:

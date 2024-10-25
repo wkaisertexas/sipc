@@ -8,6 +8,7 @@ a.out
 # ANTLR4
 *.tokens
 *.interp
+.antlr
 
 # build directory
 build

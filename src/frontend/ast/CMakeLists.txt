@@ -9,10 +9,22 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/AST.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAccessExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAccessExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTIndexingExpr.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTIndexingExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAllocExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAllocExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTBoolExpr.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTBoolExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayExpr.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayLenExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayLenExpr.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayOfExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTArrayOfExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAssignStmt.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTAssignStmt.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTTernaryExpr.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTTernaryExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTBinaryExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTBinaryExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTBlockStmt.cpp
@@ -28,6 +40,8 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFieldExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFieldExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTForStmt.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTForStmt.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFunAppExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFunAppExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTFunction.cpp
@@ -49,6 +63,8 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTRecordExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTRefExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTRefExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTUpdateStmt.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTUpdateStmt.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTReturnStmt.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTReturnStmt.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTStmt.h

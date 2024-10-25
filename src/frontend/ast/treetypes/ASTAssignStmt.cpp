@@ -19,4 +19,4 @@ std::vector<std::shared_ptr<ASTNode>> ASTAssignStmt::getChildren() {
   children.push_back(LHS);
   children.push_back(RHS);
   return children;
-}
+} // LCOV_EXCL_LINE

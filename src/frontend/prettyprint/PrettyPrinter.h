@@ -1,5 +1,8 @@
 #pragma once
 
+#include "ASTArrayOfExpr.h"
+#include "ASTIndexingExpr.h"
+#include "ASTTernaryExpr.h"
 #include "ASTVisitor.h"
 #include <iostream>
 #include <ostream>
@@ -31,16 +34,22 @@ public:
   virtual bool visit(ASTFunction *element) override;
   virtual void endVisit(ASTFunction *element) override;
   virtual void endVisit(ASTNumberExpr *element) override;
+  virtual void endVisit(ASTBoolExpr *element) override;
   virtual void endVisit(ASTVariableExpr *element) override;
+  virtual void endVisit(ASTIndexingExpr *element) override;
   virtual void endVisit(ASTBinaryExpr *element) override;
   virtual void endVisit(ASTInputExpr *element) override;
   virtual void endVisit(ASTFunAppExpr *element) override;
   virtual void endVisit(ASTAllocExpr *element) override;
+  virtual void endVisit(ASTArrayExpr *element) override;
+  virtual void endVisit(ASTArrayLenExpr *element) override;
   virtual void endVisit(ASTRefExpr *element) override;
   virtual void endVisit(ASTDeRefExpr *element) override;
   virtual void endVisit(ASTNullExpr *element) override;
   virtual void endVisit(ASTFieldExpr *element) override;
   virtual void endVisit(ASTRecordExpr *element) override;
+  virtual void endVisit(ASTArrayOfExpr *element) override;
+  virtual void endVisit(ASTTernaryExpr *element) override;
   virtual void endVisit(ASTAccessExpr *element) override;
   virtual void endVisit(ASTDeclNode *element) override;
   virtual void endVisit(ASTDeclStmt *element) override;
@@ -49,9 +58,12 @@ public:
   virtual void endVisit(ASTBlockStmt *element) override;
   virtual bool visit(ASTWhileStmt *element) override;
   virtual void endVisit(ASTWhileStmt *element) override;
+  virtual bool visit(ASTForStmt *element) override;
+  virtual void endVisit(ASTForStmt *element) override;
   virtual bool visit(ASTIfStmt *element) override;
   virtual void endVisit(ASTIfStmt *element) override;
   virtual void endVisit(ASTOutputStmt *element) override;
+  virtual void endVisit(ASTUpdateStmt *element) override;
   virtual void endVisit(ASTReturnStmt *element) override;
   virtual void endVisit(ASTErrorStmt *element) override;
 
