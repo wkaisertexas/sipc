@@ -358,12 +358,12 @@ TEST_CASE("PrettyPrinter: Test paren expr", "[PrettyPrinter]") {
 
 TEST_CASE("PrettyPrinter: Test while spacing", "[PrettyPrinter]") {
   std::stringstream stream;
-  stream << R"(prog(){var x,y;while(y>0){x=x+y;y=y-1;}return x;})";
+  stream << R"(prog(){var x,y;while(y>=0){x=x+y;y=y-1;}return x;})";
 
   std::string expected = R"(prog() 
 {
   var x, y;
-  while ((y > 0)) 
+  while ((y >= 0)) 
     {
       x = (x + y);
       y = (y - 1);
