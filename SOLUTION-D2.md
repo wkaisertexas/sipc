@@ -17,9 +17,8 @@ To complete this project, we first completed one AST node from start to finish t
 
 ## Challenges
 
-Completing this project was embarassingly not parallel. High degrees of coordination were required when writing this project to make sure that the work was completed properly.
+Completing this project was not parallel, in the sense that one person typically had to write the full code for an ASTNode all the way through before getting feedback. Most of the work was figuring out how to do the initial ASTNode, and it was fairly straight forward to replicate from there.
 
 ## Testing
 
-We added tests in the following places: PrettyPrinterTest, ASTNodeTest, and ASTPrinterTest.
-We used code coverage to determine the effectiveness of codes. 
+We added tests in the following places: PrettyPrinterTest, ASTNodeTest, and ASTPrinterTest. We used our document to track that every piece of code we added was tested. For nodes like the for statement, we tested each variation. We verified the completeness of our tests by running a code coverage checker, which showed that all the new code in the newly added AST nodes were tested. We also recognize that code coverage alone is not enough, because the same line might have two different effects, so we were carefully to manually check all the variations.

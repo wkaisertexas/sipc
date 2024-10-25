@@ -211,7 +211,6 @@ TEST_CASE("ASTPrinterTest: local expr test", "[ASTNodePrint]") {
 TEST_CASE("ASTPrinterTest: local unique expr test", "[ASTNodePrint]") {
   auto zero = std::make_shared<ASTNumberExpr>(0);
   auto var = std::make_shared<ASTVariableExpr>("y");
-  std::cout << "here";
 
   // Here we create a shared pointer to the binary expr
   auto ypluszero =
