@@ -631,6 +631,8 @@ TEST_CASE("ASTForStmtTest: Test methods of AST array of expr", "[ASTNodes]") {
    std::stringstream o;
    o << *stmt;
    REQUIRE(o.str() == "[1 of 2]");  
+
+   REQUIRE(stmt->getChildren().size() == 2);
 }
 
 

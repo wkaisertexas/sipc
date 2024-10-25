@@ -12,6 +12,10 @@ void ASTArrayOfExpr::accept(ASTVisitor *visitor) {
   visitor->endVisit(this);
 }
 
+std::vector<std::shared_ptr<ASTNode>> ASTArrayOfExpr::getChildren() {
+  return {E1, E2};
+}
+
 std::ostream &ASTArrayOfExpr::print(std::ostream &out) const {
   out << "[" << *this->E1 << " of " << *this->E2 << "]";
   return out;

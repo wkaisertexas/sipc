@@ -14,6 +14,8 @@ public:
   std::shared_ptr<ASTExpr> getE1() const { return E1; }
   std::shared_ptr<ASTExpr> getE2() const { return E2; }
 
+  std::vector<std::shared_ptr<ASTNode>> getChildren() override;
+
   void accept(ASTVisitor *visitor) override;
   llvm::Value *codegen() override;
 
