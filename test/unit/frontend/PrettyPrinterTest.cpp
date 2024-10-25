@@ -314,6 +314,28 @@ TEST_CASE("PrettyPrinter: Test Update Stmt", "[PrettyPrinter]") {
   REQUIRE(ppString == expected);
 }
 
+TEST_CASE("PrettyPrinter: Test Bool Expr", "[PrettyPrinter]") {
+  std::stringstream stream;
+  stream << R"(prog() { var x,y; y=true; x=false; return 0; })";
+
+  std::string expected = R"(prog() 
+{
+  var x, y;
+  y = true;
+  x = false;
+  return 0;
+}
+)";
+
+  std::stringstream pp;
+  auto ast = ASTHelper::build_ast(stream);
+  PrettyPrinter::print(ast.get(), pp, ' ', 2);
+  std::string ppString = GeneralHelper::removeTrailingWhitespace(pp.str());
+  expected = GeneralHelper::removeTrailingWhitespace(expected);
+  REQUIRE(ppString == expected);
+}
+
+
 TEST_CASE("PrettyPrinter: Test paren expr", "[PrettyPrinter]") {
   std::stringstream stream;
   stream << R"(prog() { var x, y; x = y * 3 % 4 + 4 - y; return 0; })";
@@ -454,15 +476,6 @@ TEST_CASE("PrettyPrinter: Test for loops with range and increment", "[PrettyPrin
 
 TEST_CASE("PrettyPrinter: Test arrays", "[PrettyPrinter]") {
   std::stringstream stream;
-<<<<<<< HEAD
-  stream << R"(prog(){var x; x=[1,2,3,4];return x;})";
-
-  std::string expected = R"(prog() 
-{
-  var x;
-  x = [1, 2, 3, 4];
-  return x;
-=======
   stream << R"(prog(){var x,y,z;for(x : 1..10 by 2) { z = z + x; }, y = [1, 2, 3, 4, 5]; return z;})";
 
   std::string expected = R"(prog() 
@@ -474,7 +487,6 @@ TEST_CASE("PrettyPrinter: Test arrays", "[PrettyPrinter]") {
     }
   y = [1, 2, 3, 4, 5];
   return z;
->>>>>>> d6c21cca39be40fe9193eb18029a48143a90cf93
 }
 )";
 

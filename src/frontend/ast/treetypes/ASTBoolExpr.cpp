@@ -9,6 +9,6 @@ void ASTBoolExpr::accept(ASTVisitor *visitor) {
 }
 
 std::ostream &ASTBoolExpr::print(std::ostream &out) const {
-  out << getValue() ? "true" : "false";
+  out << (getValue() ? "true" : "false"); 
   return out;
 }
