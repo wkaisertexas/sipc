@@ -1,3 +1,4 @@
+#include "ASTArrayOfExpr.h"
 #include "ASTHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
@@ -300,14 +301,20 @@ TEST_CASE("ASTPrinterTest: Array printer.", "[ASTNodePrint]") {
    foo(x) {
       var x, y;
       y = [1, 2, 3, 4];
+      x = [1 of 2];
       return y;
    }
    )";
 
    auto ast = ASTHelper::build_ast(stream);
    auto stmt = ASTHelper::find_node<ASTArrayExpr>(ast);
+   auto x_stmt = ASTHelper::find_node<ASTArrayOfExpr>(ast);
    
    std::stringstream o;
    o << *stmt;
    REQUIRE(o.str() == "[1, 2, 3, 4]");
+
+    o = std::stringstream();
+    o << *x_stmt;
+    REQUIRE(o.str() == "[1 of 2]");
 }

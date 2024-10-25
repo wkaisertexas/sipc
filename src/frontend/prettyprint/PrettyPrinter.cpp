@@ -178,6 +178,15 @@ void PrettyPrinter::endVisit(ASTNullExpr *element) {
   visitResults.push_back("null");
 }
 
+
+void PrettyPrinter::endVisit(ASTArrayOfExpr *element) {
+  std::string base = visitResults.back();
+  visitResults.pop_back();
+  std::string b2 = visitResults.back();
+  visitResults.pop_back();
+  visitResults.push_back("[" + base + " of " + b2 + "]");
+}
+
 void PrettyPrinter::endVisit(ASTFieldExpr *element) {
   std::string init = visitResults.back();
   visitResults.pop_back();

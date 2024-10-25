@@ -431,6 +431,14 @@ llvm::Value *ASTBoolExpr::codegen() {
                                 getValue());
 } // LCOV_EXCL_LINE
 
+llvm::Value *ASTArrayOfExpr::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
+
+  throw std::runtime_error("Array of expression not implemented yet");
+
+  return nullptr;
+} // LCOV_EXCL_LINE
+
 llvm::Value *ASTIndexingExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
   

@@ -59,16 +59,14 @@ expr : expr '(' (expr (',' expr)*)? ')' 	#funAppExpr
      | KNULL					#nullExpr
      | op=(KTRUE | KFALSE)      #boolExpr
      | recordExpr				#recordRule
-     | arrayExpr                #arrayLiteral
+     | '[' (expr (',' expr)*)? ']' #arrayLiteral
+     | '[' expr KOF expr ']' #arrayOfExpr
      | expr op=(LOR | LAND) expr #nonShortCircuiting
      | expr op=(KAND | KOR) expr #boolOps
      | '(' expr ')'				#parenExpr
 ;
 
 recordExpr : '{' (fieldExpr (',' fieldExpr)*)? '}' ;
-
-arrayExpr : '[' (expr (',' expr)*)? ']'
-          | '[' expr KOF expr ']' ;
 
 fieldExpr : IDENTIFIER ':' expr ;
 

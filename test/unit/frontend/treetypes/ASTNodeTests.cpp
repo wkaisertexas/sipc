@@ -1,3 +1,4 @@
+#include "ASTArrayOfExpr.h"
 #include "ASTHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
@@ -566,6 +567,24 @@ TEST_CASE("ASTForStmtTest: Test methods of AST subtype for item-iterator version
    std::stringstream o3;
    o3 << *stmt->getIterator();
    REQUIRE(o3.str() == "y");
+}
+
+TEST_CASE("ASTForStmtTest: Test methods of AST array of expr", "[ASTNodes]") {
+   std::stringstream stream;
+   stream << R"(
+   foo(x) {
+      var x, y;
+      x = [1 of 2];
+      return y;
+   }
+   )";
+
+   auto ast = ASTHelper::build_ast(stream);
+   auto stmt = ASTHelper::find_node<ASTArrayOfExpr>(ast);
+
+   std::stringstream o;
+   o << *stmt;
+   REQUIRE(o.str() == "[1 of 2]");  
 }
 
 

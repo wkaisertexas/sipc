@@ -41,3 +41,4 @@
 #include "ASTVariableExpr.h"
 #include "ASTWhileStmt.h"
 #include "ASTBoolExpr.h"
+#include "ASTArrayOfExpr.h"
