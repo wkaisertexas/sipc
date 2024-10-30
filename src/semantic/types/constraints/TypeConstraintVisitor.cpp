@@ -1,6 +1,7 @@
 #include "TypeConstraintVisitor.h"
 #include "TipAbsentField.h"
 #include "TipAlpha.h"
+#include "TipBool.h"
 #include "TipFunction.h"
 #include "TipInt.h"
 #include "TipRecord.h"
@@ -87,30 +88,48 @@ void TypeConstraintVisitor::endVisit(ASTNumberExpr *element) {
   constraintHandler->handle(astToVar(element), std::make_shared<TipInt>());
 }
 
+
+/*! \brief Type constraints for boolean literal.
+ *
+ * Type rules for "B":
+ *   [[B]] = bool
+ */
+void TypeConstraintVisitor::endVisit(ASTBoolExpr *element) {
+  constraintHandler->handle(astToVar(element), std::make_shared<TipBool>());
+}
+
 /*! \brief Type constraints for binary operator.
  *
  * Type rules for "E1 op E2":
- *   [[E1 op E2]] = int
- * and if "op" is not equality or disequality
- *   [[E1]] = [[E2]] = int
+ * if op is "==" or "!=" or "<" or ">" or "<=" or ">="
+ *   [[E1 op E2]] = bool
  * otherwise
+ *   [[E1 op E2]] = int
+ * and if "op" is equality or disequality
  *   [[E1]] = [[E2]]
+ * otherwise
+ *   [[E1]] = [[E2]] = int
  */
 void TypeConstraintVisitor::endVisit(ASTBinaryExpr *element) {
   auto op = element->getOp();
   auto intType = std::make_shared<TipInt>();
+  auto boolType = std::make_shared<TipBool>();
 
-  // result type is integer
-  constraintHandler->handle(astToVar(element), intType);
+  if (op == "+" || op == "-" || op == "*" || op == "/") {
+    // result type is integer
+    constraintHandler->handle(astToVar(element), intType);
+  } else {
+    // result type is bool
+    constraintHandler->handle(astToVar(element), boolType);
+  }
 
-  if (op != "==" && op != "!=") {
+  if (op == "==" || op == "!=") {
+    // operands are equivalent in type
+    constraintHandler->handle(astToVar(element->getLeft()), astToVar(element->getRight()));    
+  } else {
     // operands are integer
     constraintHandler->handle(astToVar(element->getLeft()), intType);
     constraintHandler->handle(astToVar(element->getRight()), intType);
-  } else {
-    // operands have the same type
-    constraintHandler->handle(astToVar(element->getLeft()),
-                              astToVar(element->getRight()));
   }
 }
 
@@ -207,21 +226,21 @@ void TypeConstraintVisitor::endVisit(ASTAssignStmt *element) {
 /*! \brief Type constraints for while loop.
  *
  * Type rules for "while (E) S":
- *   [[E]] = int
+ *   [[E]] = bool
  */
 void TypeConstraintVisitor::endVisit(ASTWhileStmt *element) {
   constraintHandler->handle(astToVar(element->getCondition()),
-                            std::make_shared<TipInt>());
+                            std::make_shared<TipBool>());
 }
 
 /*! \brief Type constraints for if statement.
  *
  * Type rules for "if (E) S1 else S2":
- *   [[E]] = int
+ *   [[E]] = bool
  */
 void TypeConstraintVisitor::endVisit(ASTIfStmt *element) {
   constraintHandler->handle(astToVar(element->getCondition()),
-                            std::make_shared<TipInt>());
+                            std::make_shared<TipBool>());
 }
 
 /*! \brief Type constraints for output statement.

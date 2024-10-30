@@ -43,6 +43,7 @@ public:
   void endVisit(ASTAllocExpr *element) override;
   void endVisit(ASTAssignStmt *element) override;
   void endVisit(ASTBinaryExpr *element) override;
+  void endVisit(ASTBoolExpr *element) override;
   void endVisit(ASTDeRefExpr *element) override;
   void endVisit(ASTErrorStmt *element) override;
   void endVisit(ASTFunAppExpr *element) override;
