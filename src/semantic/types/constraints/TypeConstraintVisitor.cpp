@@ -70,7 +70,7 @@ void TypeConstraintVisitor::endVisit(ASTFunction *element) {
       formals.push_back(astToVar(f));
     }
 
-    // Return is the last statement
+    // Return is the last statement.
     auto ret = dynamic_cast<ASTReturnStmt *>(element->getStmts().back());
 
     constraintHandler->handle(

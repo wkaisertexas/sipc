@@ -60,6 +60,31 @@ TEST_CASE("Check Assignable: address of field", "[Symbol]") {
   REQUIRE_NOTHROW(CheckAssignable::check(ast.get()));
 }
 
+TEST_CASE("Check Assignable: array index", "[Symbol]") {
+  std::stringstream stream;
+  stream
+      << R"(arrayindexlhs() { var x; x = [1, 2, 3]; x[0] = 0; return 0; })";
+  auto ast = ASTHelper::build_ast(stream);
+  REQUIRE_NOTHROW(CheckAssignable::check(ast.get()));
+}
+
+TEST_CASE("Check Assignable: increment", "[Symbol]") {
+  std::stringstream stream;
+  stream
+      << R"(arrayindexlhs() { var x; x = 0; x++; return 0; })";
+  auto ast = ASTHelper::build_ast(stream);
+  REQUIRE_NOTHROW(CheckAssignable::check(ast.get()));
+}
+
+TEST_CASE("Check Assignable: decrement", "[Symbol]") {
+  std::stringstream stream;
+  stream
+      << R"(arrayindexlhs() { var x; x = 0; x++; return 0; })";
+  auto ast = ASTHelper::build_ast(stream);
+  REQUIRE_NOTHROW(CheckAssignable::check(ast.get()));
+}
+
+
 /************** the following are expected to fail the check ************/
 
 TEST_CASE("Check Assignable: constant lhs", "[Symbol]") {
@@ -116,4 +141,23 @@ TEST_CASE("Check Assignable: address of expr", "[Symbol]") {
   auto ast = ASTHelper::build_ast(stream);
   REQUIRE_THROWS_MATCHES(CheckAssignable::check(ast.get()), SemanticError,
                          ContainsWhat("(y*y) not an l-value"));
+}
+
+
+TEST_CASE("Check Assignable: update stmt requires l-value", "[Symbol]") {
+  std::stringstream stream;
+  stream 
+      << R"(arrayindexlhs() { var x; x = 0; 1++; return 0; })";
+  auto ast = ASTHelper::build_ast(stream);
+  REQUIRE_THROWS_MATCHES(CheckAssignable::check(ast.get()), SemanticError,
+                         ContainsWhat("1 not an l-value"));
+}
+
+TEST_CASE("Check Assignable: array index requires l-value 1", "[Symbol]") {
+  std::stringstream stream;
+  stream 
+      << R"(arrayindexlhs() { 1[0] = 0; return 0; })";
+  auto ast = ASTHelper::build_ast(stream);
+  REQUIRE_THROWS_MATCHES(CheckAssignable::check(ast.get()), SemanticError,
+                         ContainsWhat("1[0] not an l-value"));
 }
