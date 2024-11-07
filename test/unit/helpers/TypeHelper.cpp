@@ -1,6 +1,7 @@
 #include "TypeHelper.h"
 
 #include "TipAlpha.h"
+#include "TipBool.h"
 #include "TipFunction.h"
 #include "TipInt.h"
 #include "TipMu.h"
@@ -11,6 +12,10 @@
 
 std::shared_ptr<TipType> TypeHelper::intType() {
    return std::make_shared<TipInt>();
+}
+
+std::shared_ptr<TipType> TypeHelper::boolType() {
+   return std::make_shared<TipBool>();
 }
 
 std::shared_ptr<TipType> TypeHelper::alphaType(ASTNode *node) {
