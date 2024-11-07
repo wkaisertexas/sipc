@@ -56,6 +56,7 @@ public:
   void endVisit(ASTRecordExpr *element) override;
   void endVisit(ASTRefExpr *element) override;
   void endVisit(ASTWhileStmt *element) override;
+  void endVisit(ASTUpdateStmt *element) override;
 
 protected:
   std::shared_ptr<ConstraintHandler> constraintHandler;

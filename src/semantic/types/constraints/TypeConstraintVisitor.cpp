@@ -281,6 +281,7 @@ void TypeConstraintVisitor::endVisit(ASTRecordExpr *element) {
                             std::make_shared<TipRecord>(fieldTypes, allFields));
 }
 
+
 /*! \brief Type constraints for field access.
  *
  * Type rule for "E.X":
@@ -308,6 +309,16 @@ void TypeConstraintVisitor::endVisit(ASTAccessExpr *element) {
  *   [[E]] = int
  */
 void TypeConstraintVisitor::endVisit(ASTErrorStmt *element) {
+  constraintHandler->handle(astToVar(element->getArg()),
+                            std::make_shared<TipInt>());
+}
+
+/*! \brief Type constraints for update statements.
+ *
+ * Type rules for "E++" or "E--":
+ *   [[E]] = int
+ */
+void TypeConstraintVisitor::endVisit(ASTUpdateStmt *element) {
   constraintHandler->handle(astToVar(element->getArg()),
                             std::make_shared<TipInt>());
 }

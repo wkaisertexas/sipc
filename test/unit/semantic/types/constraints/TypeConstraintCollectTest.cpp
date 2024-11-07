@@ -461,6 +461,31 @@ main() {
     REQUIRE(*unifier.inferred(r1Type) == *TypeHelper::intType());
 }
 
+TEST_CASE("TypeConstraintVisitor: update statement", "[TypeConstraintVisitor]") {
+  std::stringstream program;
+  program << R"(
+      // [[x]] = int, [[test]] = (int) -> int
+      test(x) {
+        x++;
+        return x;
+      }
+    )";
+
+    auto unifierSymbols = collectAndSolve(program);
+    auto unifier = unifierSymbols.first;
+    auto symbols = unifierSymbols.second;
+
+    std::vector<std::shared_ptr<TipType>> oneInt{TypeHelper::intType()};
+
+    auto fDecl = symbols->getFunction("test");
+    auto fType = std::make_shared<TipVar>(fDecl);
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(oneInt, TypeHelper::intType()));
+
+    auto xType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
+    REQUIRE(*unifier.inferred(xType) == *TypeHelper::intType());
+}
+
+
 /*
 TEST_CASE("TypeConstraintVisitor: boolean assignment",
           "[TypeConstraintVisitor]") {
