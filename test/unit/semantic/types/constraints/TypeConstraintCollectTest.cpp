@@ -567,7 +567,7 @@ TEST_CASE("TypeConstraintVisitor: array indexing", "[TypeConstraintVisitor]") {
       test(x) {
         var a, x, y;
         a = [1, 2, 3];
-        x = a[y];
+        x = a[1];
         return x;
       }
     )";
@@ -686,8 +686,7 @@ TEST_CASE("TypeConstraintVisitor: ternery expression",
     program << R"(
             // [[b]] = bool, [[test]] = (bool) -> int
             test(b) {
-              var x;
-              return b ? 1 : x;
+              return b ? 1 : 0;
             }
          )";
 
