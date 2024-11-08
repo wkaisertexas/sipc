@@ -376,3 +376,25 @@ void TypeConstraintVisitor::endVisit(ASTArrayLenExpr *element) {
                             std::make_shared<TipInt>());
   
 }
+
+/*! \brief Type constraints for not expr.
+ *
+ * Type rules for "not E":
+ *   [[E]] = bool
+ */
+void TypeConstraintVisitor::endVisit(ASTNotExpr *element) {
+  constraintHandler->handle(astToVar(element->getArg()),
+                            std::make_shared<TipBool>());
+  
+}
+
+/*! \brief Type constraints for neg expr.
+ *
+ * Type rules for "-E":
+ *   [[E]] = int
+ */
+void TypeConstraintVisitor::endVisit(ASTNegExpr *element) {
+  constraintHandler->handle(astToVar(element->getArg()),
+                            std::make_shared<TipInt>());
+  
+}

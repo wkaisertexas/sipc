@@ -1131,3 +1131,17 @@ llvm::Value *ASTReturnStmt::codegen() {
   llvm::Value *argVal = getArg()->codegen();
   return irBuilder.CreateRet(argVal);
 }
+
+llvm::Value *ASTNotExpr::codegen(){
+  LOG_S(1) << "Generating code for " << *this;
+  llvm::Value *lastStmt = nullptr;
+  throw std::runtime_error("Update statement not implemented yet"); 
+  return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+}
+
+llvm::Value *ASTNegExpr::codegen(){
+  LOG_S(1) << "Generating code for " << *this;
+  llvm::Value *lastStmt = nullptr;
+  throw std::runtime_error("Update statement not implemented yet"); 
+  return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+}

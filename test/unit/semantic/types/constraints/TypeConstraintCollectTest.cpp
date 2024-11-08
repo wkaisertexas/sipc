@@ -485,6 +485,29 @@ TEST_CASE("TypeConstraintVisitor: update statement", "[TypeConstraintVisitor]") 
     REQUIRE(*unifier.inferred(xType) == *TypeHelper::intType());
 }
 
+TEST_CASE("TypeConstraintVisitor: neg expr", "[TypeConstraintVisitor]") {
+  std::stringstream program;
+  program << R"(
+      // [[x]] = [int], [[test]] = (int) -> int
+      test(x) {
+        x = -(x*x);
+        return x;
+      }
+    )";
+
+    auto unifierSymbols = collectAndSolve(program);
+    auto unifier = unifierSymbols.first;
+    auto symbols = unifierSymbols.second;
+
+    std::vector<std::shared_ptr<TipType>> oneInt{TypeHelper::intType()};
+
+    auto fDecl = symbols->getFunction("test");
+    auto fType = std::make_shared<TipVar>(fDecl);
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(oneInt, TypeHelper::intType()));
+
+    auto aType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
+    REQUIRE(*unifier.inferred(aType) == *TypeHelper::intType());
+}
 
 TEST_CASE("TypeConstraintVisitor: array expr", "[TypeConstraintVisitor]") {
   std::stringstream program;
@@ -624,4 +647,29 @@ TEST_CASE("TypeConstraintVisitor: while statement takes bool",
 
     auto bType = std::make_shared<TipVar>(symbols->getLocal("b", fDecl));
     REQUIRE(*unifier.inferred(bType) == *TypeHelper::boolType());
+}
+
+
+TEST_CASE("TypeConstraintVisitor: not expr", "[TypeConstraintVisitor]") {
+  std::stringstream program;
+  program << R"(
+      // [[x]] = [bool], [[test]] = (bool) -> int
+      test(x) {
+        x = not x;
+        return 1;
+      }
+    )";
+
+    auto unifierSymbols = collectAndSolve(program);
+    auto unifier = unifierSymbols.first;
+    auto symbols = unifierSymbols.second;
+
+    std::vector<std::shared_ptr<TipType>> oneBool{TypeHelper::boolType()};
+
+    auto fDecl = symbols->getFunction("test");
+    auto fType = std::make_shared<TipVar>(fDecl);
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(oneBool, TypeHelper::intType()));
+
+    auto aType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
+    REQUIRE(*unifier.inferred(aType) == *TypeHelper::boolType());
 }

@@ -138,6 +138,18 @@ void PrettyPrinter::endVisit(ASTDeRefExpr *element) {
   visitResults.push_back("*" + base);
 }
 
+void PrettyPrinter::endVisit(ASTNotExpr *element) {
+  std::string base = visitResults.back();
+  visitResults.pop_back();
+  visitResults.push_back("(not " + base + ")");
+}
+
+void PrettyPrinter::endVisit(ASTNegExpr *element) {
+  std::string base = visitResults.back();
+  visitResults.pop_back();
+  visitResults.push_back("-(" + base + ")");
+}
+
 void PrettyPrinter::endVisit(ASTIndexingExpr *element){
   std::string index = visitResults.back();
   visitResults.pop_back();
