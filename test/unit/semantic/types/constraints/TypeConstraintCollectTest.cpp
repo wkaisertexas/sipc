@@ -27,12 +27,6 @@ static std::pair<Unifier, std::shared_ptr<SymbolTable>> collectAndSolve(std::str
 
     auto collected = visitor.getCollectedConstraints();
 
-    
-    std::cout << "\n";
-    for(auto constraint : collected) {
-      std::cout << constraint << "\n";
-    }
-
     Unifier unifier(collected);
     REQUIRE_NOTHROW(unifier.solve());
 

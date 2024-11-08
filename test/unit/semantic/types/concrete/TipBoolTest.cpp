@@ -12,6 +12,12 @@ TEST_CASE("TipBool: test TipBool is a TipCons"
   REQUIRE_FALSE(nullptr == dynamic_cast<TipCons *>(&t));
 }
 
+TEST_CASE("Tip Bool is itself a TipVar", "[tip_bool]") {
+  TipBool t;
+  TipBool t2;
+  REQUIRE_FALSE(t != t2);
+}
+
 TEST_CASE("TipBool: test TipBool is a TipType"
           "[tip_bool]") {
   TipBool t;
