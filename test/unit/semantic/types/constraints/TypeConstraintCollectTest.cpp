@@ -27,12 +27,6 @@ static std::pair<Unifier, std::shared_ptr<SymbolTable>> collectAndSolve(std::str
 
     auto collected = visitor.getCollectedConstraints();
 
-    
-    std::cout << "\n";
-    for(auto constraint : collected) {
-      std::cout << constraint << "\n";
-    }
-
     Unifier unifier(collected);
     REQUIRE_NOTHROW(unifier.solve());
 
@@ -537,7 +531,6 @@ TEST_CASE("TypeConstraintVisitor: array expr", "[TypeConstraintVisitor]") {
     REQUIRE(*unifier.inferred(aType) == *TypeHelper::arrayType(TypeHelper::intType()));
 }
 
-/*
 TEST_CASE("TypeConstraintVisitor: boolean assignment",
           "[TypeConstraintVisitor]") {
     std::stringstream program;
@@ -617,7 +610,7 @@ TEST_CASE("TypeConstraintVisitor: if statement takes bool",
 
     auto fDecl = symbols->getFunction("test");
     auto fType = std::make_shared<TipVar>(fDecl);
-    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(oneBool, TypeHelper::boolType()));
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(oneBool, TypeHelper::intType()));
 
     auto bType = std::make_shared<TipVar>(symbols->getLocal("b", fDecl));
     REQUIRE(*unifier.inferred(bType) == *TypeHelper::boolType());
@@ -644,7 +637,7 @@ TEST_CASE("TypeConstraintVisitor: while statement takes bool",
 
     auto fDecl = symbols->getFunction("test");
     auto fType = std::make_shared<TipVar>(fDecl);
-    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(oneBool, TypeHelper::boolType()));
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(oneBool, TypeHelper::intType()));
 
     auto bType = std::make_shared<TipVar>(symbols->getLocal("b", fDecl));
     REQUIRE(*unifier.inferred(bType) == *TypeHelper::boolType());
@@ -674,4 +667,3 @@ TEST_CASE("TypeConstraintVisitor: not expr", "[TypeConstraintVisitor]") {
     auto aType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
     REQUIRE(*unifier.inferred(aType) == *TypeHelper::boolType());
 }
-*/
