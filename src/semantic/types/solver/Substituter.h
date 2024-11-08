@@ -42,4 +42,6 @@ public:
   virtual void endVisit(TipAbsentField *element) override;
   virtual void endVisit(TipRef *element) override;
   virtual void endVisit(TipVar *element) override;
+  virtual void endVisit(TipArray *element) override;
+  virtual void endVisit(TipBool *element) override;
 };

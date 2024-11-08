@@ -386,10 +386,12 @@ void TypeConstraintVisitor::endVisit(ASTIndexingExpr *element) {
  *   [[#E]] =  int
  */
 void TypeConstraintVisitor::endVisit(ASTArrayLenExpr *element) {
-  constraintHandler->handle(astToVar(element->getPtr()),
+  constraintHandler->handle(astToVar(element),
                             std::make_shared<TipInt>());
-  
+  constraintHandler->handle(astToVar(element->getPtr()),
+                            std::make_shared<TipArray>(std::make_shared<TipAlpha>(element)));
 }
+
 
 /*! \brief Type constraints for not expr.
  *
