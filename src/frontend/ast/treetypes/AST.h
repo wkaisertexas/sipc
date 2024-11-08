@@ -28,6 +28,8 @@
 #include "ASTIfStmt.h"
 #include "ASTInputExpr.h"
 #include "ASTNode.h"
+#include "ASTNotExpr.h"
+#include "ASTNegExpr.h"
 #include "ASTNullExpr.h"
 #include "ASTNumberExpr.h"
 #include "ASTOutputStmt.h"

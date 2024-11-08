@@ -737,3 +737,41 @@ TEST_CASE("ASTArrayExprTest: Test methods of AST subtype for arrays.", "[ASTNode
    REQUIRE(expr->getChildren().size() == 3);
 
 }
+
+TEST_CASE("ASTTNotExprTest: Test methods of AST subtype.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo(p) {
+         return not (p + p);
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto expr = ASTHelper::find_node<ASTNotExpr>(ast);
+
+    std::stringstream o1;
+    o1 << *expr->getArg();
+    REQUIRE(o1.str() == "(p+p)");
+
+    REQUIRE(expr->getChildren().size() == 1);
+}
+
+TEST_CASE("ASTTNegExprTest: Test methods of AST subtype.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo(p) {
+         return -(p + p);
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto expr = ASTHelper::find_node<ASTNegExpr>(ast);
+
+    std::stringstream o1;
+    o1 << *expr->getArg();
+    REQUIRE(o1.str() == "(p+p)");
+
+    REQUIRE(expr->getChildren().size() == 1);
+}

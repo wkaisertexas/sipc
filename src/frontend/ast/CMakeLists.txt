@@ -50,7 +50,11 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTIfStmt.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTInputExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTInputExpr.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTNegExpr.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTNegExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTNode.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTNotExpr.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTNotExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTNullExpr.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTNullExpr.h
           ${CMAKE_CURRENT_SOURCE_DIR}/treetypes/ASTNumberExpr.cpp

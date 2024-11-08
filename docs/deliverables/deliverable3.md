@@ -11,3 +11,6 @@
 | Booleans                                  | Number literals | x        | x           | x           | x              | X       | X         | X             |                    |
 | Array Indexing                            | Record Literal  | X        | X           | X           | X              | X       | X         | X             |                    |
 | Negation                                  |                 | X        | X           | X           | X              | X       | X         | X             |                    |
+
+
+* Write tests for TipArray

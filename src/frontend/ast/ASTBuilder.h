@@ -74,4 +74,6 @@ public:
   Any visitOutputStmt(TIPParser::OutputStmtContext *ctx) override;
   Any visitErrorStmt(TIPParser::ErrorStmtContext *ctx) override;
   Any visitReturnStmt(TIPParser::ReturnStmtContext *ctx) override;
+  Any visitNotExpr(TIPParser::NotExprContext *ctx) override;
+  Any visitNegExpr(TIPParser::NegExprContext *ctx) override;
 };

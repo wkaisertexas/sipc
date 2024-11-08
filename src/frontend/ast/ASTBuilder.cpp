@@ -52,6 +52,12 @@ std::string ASTBuilder::opString(int op) {
   case TIPParser::NE:
     opStr = "!=";
     break;
+  case TIPParser::KAND:
+    opStr = "and";
+    break;
+  case TIPParser::KOR:
+    opStr = "or";
+    break;
   default:
     throw std::runtime_error(
         "unknown operator :" +
@@ -651,6 +657,31 @@ Any ASTBuilder::visitAssignStmt(TIPParser::AssignStmtContext *ctx) {
                            ctx->getStart()->getCharPositionInLine());
   return "";
 }
+
+Any ASTBuilder::visitNotExpr(TIPParser::NotExprContext *ctx) {
+  visit(ctx->expr());
+  visitedExpr = std::make_shared<ASTNotExpr>(visitedExpr);
+
+  LOG_S(1) << "Built AST node " << *visitedExpr;
+
+  // Set source location
+  visitedExpr->setLocation(ctx->getStart()->getLine(),
+                           ctx->getStart()->getCharPositionInLine());
+  return "";
+} // LCOV_EXCL_LINE
+
+Any ASTBuilder::visitNegExpr(TIPParser::NegExprContext *ctx) {
+  visit(ctx->expr());
+  visitedExpr = std::make_shared<ASTNegExpr>(visitedExpr);
+
+  LOG_S(1) << "Built AST node " << *visitedExpr;
+
+  // Set source location
+  visitedExpr->setLocation(ctx->getStart()->getLine(),
+                           ctx->getStart()->getCharPositionInLine());
+  return "";
+} // LCOV_EXCL_LINE
+
 
 std::string ASTBuilder::generateSHA256(std::string tohash) {
   std::vector<unsigned char> hash(picosha2::k_digest_size);
