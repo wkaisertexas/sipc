@@ -345,13 +345,24 @@ void TypeConstraintVisitor::endVisit(ASTTernaryExpr *element) {
  */
 void TypeConstraintVisitor::endVisit(ASTArrayExpr *element) {
   auto elements = element->getElements();
-  for(int i = 0; i < elements.size() - 1; i++) {
-    constraintHandler->handle(astToVar(&*elements[i]), astToVar(&*elements.at(i + 1)));
+  std::vector<std::shared_ptr<TipType>> elementTypes;
+  
+  for (auto &elem : elements) {
+    elementTypes.push_back(astToVar(&*elem));
   }
-  if(elements.size() > 0) {
-    constraintHandler->handle(astToVar(element), std::make_shared<TipArray>(astToVar(&*elements[0])));
+
+  for (size_t i = 0; i < elementTypes.size(); ++i) {
+    for (size_t j = i + 1; j < elementTypes.size(); ++j) {
+      constraintHandler->handle(elementTypes[i], elementTypes[j]);
+    }
+  }
+
+  if (!elementTypes.empty()) {
+    constraintHandler->handle(astToVar(element),
+                              std::make_shared<TipArray>(elementTypes.front()));
   }
 }
+
 
 // INCOMPLETE
 /*! \brief Type constraints for array indexing.

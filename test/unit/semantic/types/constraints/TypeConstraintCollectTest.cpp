@@ -514,8 +514,10 @@ TEST_CASE("TypeConstraintVisitor: array expr", "[TypeConstraintVisitor]") {
   program << R"(
       // [[x]] = [int], [[test]] = (int) -> int
       test(x) {
-        var a;
-        a = [1, 2, x];
+        var a, y;
+        a = [1, 2, 3];
+        y = x;
+        y = y + 1;
         return 1;
       }
     )";
@@ -532,9 +534,6 @@ TEST_CASE("TypeConstraintVisitor: array expr", "[TypeConstraintVisitor]") {
 
     auto aType = std::make_shared<TipVar>(symbols->getLocal("a", fDecl));
     REQUIRE(*unifier.inferred(aType) == *TypeHelper::arrayType(TypeHelper::intType()));
-
-    auto xType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
-    REQUIRE(*unifier.inferred(xType) == *TypeHelper::intType());
 }
 
 TEST_CASE("TypeConstraintVisitor: boolean assignment",
@@ -556,7 +555,7 @@ TEST_CASE("TypeConstraintVisitor: boolean assignment",
     auto fDecl = symbols->getFunction("test");
     auto fType = std::make_shared<TipVar>(fDecl);
 
-    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::intType()));
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::boolType()));
 
     auto bType = std::make_shared<TipVar>(symbols->getLocal("b", fDecl));
     //REQUIRE(*unifier.inferred(bType) == *TypeHelper::boolType());

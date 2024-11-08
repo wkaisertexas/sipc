@@ -73,4 +73,4 @@ target_include_directories(
           ${CMAKE_CURRENT_SOURCE_DIR}/concrete
           ${CMAKE_CURRENT_SOURCE_DIR}/constraints
           ${CMAKE_CURRENT_SOURCE_DIR}/solver)
-target_link_libraries(types PRIVATE coverage_config loguru)
+target_link_libraries(types PRIVATE ast coverage_config loguru)
