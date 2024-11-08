@@ -128,7 +128,7 @@ void TypeConstraintVisitor::endVisit(ASTBinaryExpr *element) {
     // operands are equivalent in type
     constraintHandler->handle(astToVar(element->getLeft()), astToVar(element->getRight()));    
   } else if (op == "and" || op == "or") {
-     // operands are integer
+     // operands are bools
     constraintHandler->handle(astToVar(element->getLeft()), boolType);
     constraintHandler->handle(astToVar(element->getRight()), boolType);
   } else {
@@ -368,7 +368,6 @@ void TypeConstraintVisitor::endVisit(ASTArrayExpr *element) {
 }
 
 
-// INCOMPLETE
 /*! \brief Type constraints for array indexing.
  *
  * Type rules for "E1[E2]":
@@ -386,7 +385,6 @@ void TypeConstraintVisitor::endVisit(ASTIndexingExpr *element) {
                             alpha);
 }
 
-// INCOMPLETE
 /*! \brief Type constraints for array length.
  *
  * Type rules for "#E":
@@ -420,4 +418,34 @@ void TypeConstraintVisitor::endVisit(ASTNegExpr *element) {
   constraintHandler->handle(astToVar(element->getArg()),
                             std::make_shared<TipInt>());
   
+}
+
+
+/*! \brief Type constraints for loops.
+ *
+ * Type rules for "for(E1 : E2) {}":
+ *   [[E2]] = [T]
+ *   [[E1]] = T
+ * Type rules for "for(E1 : E2..E3 by E4) {}":
+ *   [[E1]] = [[E2]] = [[E3]] = [[E4]] = int
+ */
+void TypeConstraintVisitor::endVisit(ASTForStmt *element) {
+  if(element->getIterator()) {
+    auto alpha = std::make_shared<TipAlpha>(element);
+    constraintHandler->handle(astToVar(element->getIterator()),
+                              std::make_shared<TipArray>(alpha));
+    constraintHandler->handle(astToVar(element->getItem()), 
+                              alpha);
+  } else {
+    constraintHandler->handle(astToVar(element->getItem()),
+                            std::make_shared<TipInt>());
+    constraintHandler->handle(astToVar(element->getRangeStart()),
+                        std::make_shared<TipInt>());
+    constraintHandler->handle(astToVar(element->getRangeEnd()),
+                    std::make_shared<TipInt>());
+    if(element->getIncrement()) {
+      constraintHandler->handle(astToVar(element->getIncrement()),
+                std::make_shared<TipInt>());
+    }
+  }
 }

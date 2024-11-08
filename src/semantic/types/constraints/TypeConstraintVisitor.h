@@ -48,6 +48,7 @@ public:
   void endVisit(ASTBoolExpr *element) override;
   void endVisit(ASTDeRefExpr *element) override;
   void endVisit(ASTErrorStmt *element) override;
+  void endVisit(ASTForStmt *element) override;
   void endVisit(ASTFunAppExpr *element) override;
   void endVisit(ASTFunction *element) override;
   void endVisit(ASTIfStmt *element) override;
@@ -63,6 +64,7 @@ public:
   void endVisit(ASTTernaryExpr *element) override;
   void endVisit(ASTWhileStmt *element) override;
   void endVisit(ASTUpdateStmt *element) override;
+  
 
 protected:
   std::shared_ptr<ConstraintHandler> constraintHandler;
