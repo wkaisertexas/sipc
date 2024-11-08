@@ -557,7 +557,7 @@ TEST_CASE("TypeConstraintVisitor: boolean assignment",
     auto fDecl = symbols->getFunction("test");
     auto fType = std::make_shared<TipVar>(fDecl);
 
-    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::intType()));
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::boolType()));
 
     auto bType = std::make_shared<TipVar>(symbols->getLocal("b", fDecl));
     //REQUIRE(*unifier.inferred(bType) == *TypeHelper::boolType());
