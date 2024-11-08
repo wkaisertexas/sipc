@@ -127,6 +127,10 @@ void TypeConstraintVisitor::endVisit(ASTBinaryExpr *element) {
   if (op == "==" || op == "!=") {
     // operands are equivalent in type
     constraintHandler->handle(astToVar(element->getLeft()), astToVar(element->getRight()));    
+  } else if (op == "and" || op == "or") {
+     // operands are integer
+    constraintHandler->handle(astToVar(element->getLeft()), boolType);
+    constraintHandler->handle(astToVar(element->getRight()), boolType);
   } else {
     // operands are integer
     constraintHandler->handle(astToVar(element->getLeft()), intType);
@@ -340,29 +344,39 @@ void TypeConstraintVisitor::endVisit(ASTTernaryExpr *element) {
 /*! \brief Type constraints for array literal.
  *
  * Type rules for "A = [E1, E2, ...]":
- *   [[E_x]] = [[E_x+1]]
+ *   [[E1]] = [[E2]] = ... = [[EN]]
  *   [[A]] = [[[E1]]]
  */
 void TypeConstraintVisitor::endVisit(ASTArrayExpr *element) {
   auto elements = element->getElements();
-  for(int i = 0; i < elements.size() - 1; i++) {
-    constraintHandler->handle(astToVar(&*elements[i]), astToVar(&*elements.at(i + 1)));
-  }
-  if(elements.size() > 0) {
-    constraintHandler->handle(astToVar(element), std::make_shared<TipArray>(astToVar(&*elements[0])));
+  if(elements.size() == 0) {
+    constraintHandler->handle(astToVar(element), 
+                              std::make_shared<TipArray>(std::make_shared<TipAlpha>(element)));
+  } else {
+    auto first = astToVar(&*elements[0]);
+    for(int i = 1; i < elements.size(); i++) {
+      constraintHandler->handle(first, astToVar(&*elements[i]));
+    }
+    constraintHandler->handle(astToVar(element), std::make_shared<TipArray>(first));
   }
 }
 
 // INCOMPLETE
 /*! \brief Type constraints for array indexing.
  *
- * Type rules for "A[B]":
- *   [[ A[B] ]] = A[B]
- */
+ * Type rules for "E1[E2]":
+ *   [[E2]] = int 
+ *   [[E1]] = [T]
+ *   [[ E[E2] ]] = T
+ */  
 void TypeConstraintVisitor::endVisit(ASTIndexingExpr *element) {
   constraintHandler->handle(astToVar(element->getIdx()),
                             std::make_shared<TipInt>());
-  
+  auto alpha = std::make_shared<TipAlpha>(element);
+  constraintHandler->handle(astToVar(element->getArr()),
+                            std::make_shared<TipArray>(alpha));
+  constraintHandler->handle(astToVar(element), 
+                            alpha);
 }
 
 // INCOMPLETE
