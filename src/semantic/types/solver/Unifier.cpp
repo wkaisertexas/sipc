@@ -255,7 +255,12 @@ Unifier::close(std::shared_ptr<TipType> type,
 
     // Perform the argument substitutions, if any, to form a new type, then add
     // it and return it.
-    auto consCopy = std::dynamic_pointer_cast<TipCons>(copy);
+    auto consCopy = std::dynamic_pointer_cast<TipCons>(copy); // fails
+
+    // TODO: Fix consCopy is a nullptr
+    if(consCopy == nullptr) {
+      throw InternalError("consCopy is a nullptr");
+    }
     consCopy->setArguments(current);
     std::vector<std::shared_ptr<TipType>> newTypes{consCopy};
     unionFind->add(newTypes);

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "ASTArrayOfExpr.h"
-#include "ASTIndexingExpr.h"
-#include "ASTTernaryExpr.h"
 #include "ASTVisitor.h"
 #include <iostream>
 #include <ostream>

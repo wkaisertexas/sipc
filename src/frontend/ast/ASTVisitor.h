@@ -1,8 +1,6 @@
 #pragma once
 
 #include "AST.h"
-#include "ASTArrayOfExpr.h"
-#include "ASTIndexingExpr.h"
 
 /*! \brief Base class for AST visitors.
  *

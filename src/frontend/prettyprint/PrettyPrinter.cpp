@@ -1,6 +1,4 @@
 #include "PrettyPrinter.h"
-#include "ASTBoolExpr.h"
-#include "ASTIndexingExpr.h"
 
 #include <iostream>
 #include <sstream>

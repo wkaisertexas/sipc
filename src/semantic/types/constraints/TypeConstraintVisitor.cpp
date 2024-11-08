@@ -324,7 +324,7 @@ void TypeConstraintVisitor::endVisit(ASTUpdateStmt *element) {
                             std::make_shared<TipInt>());
 }
 
-/*! \brief Type constraints for ternery expressions.
+/*! \brief Type constraints for ternary expressions.
  *
  * Type rules for "E1 ? E2 : E3":
  *   [[E1]] = bool
@@ -372,7 +372,7 @@ void TypeConstraintVisitor::endVisit(ASTIndexingExpr *element) {
  *   [[#E]] =  int
  */
 void TypeConstraintVisitor::endVisit(ASTArrayLenExpr *element) {
-  constraintHandler->handle(astToVar(element->getPtr)),
+  constraintHandler->handle(astToVar(element->getPtr()),
                             std::make_shared<TipInt>());
   
 }

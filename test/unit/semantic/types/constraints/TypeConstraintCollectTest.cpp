@@ -514,9 +514,6 @@ TEST_CASE("TypeConstraintVisitor: array expr", "[TypeConstraintVisitor]") {
     REQUIRE(*unifier.inferred(xType) == *TypeHelper::intType());
 }
 
-
-
-/*
 TEST_CASE("TypeConstraintVisitor: boolean assignment",
           "[TypeConstraintVisitor]") {
     std::stringstream program;
@@ -628,4 +625,3 @@ TEST_CASE("TypeConstraintVisitor: while statement takes bool",
     auto bType = std::make_shared<TipVar>(symbols->getLocal("b", fDecl));
     REQUIRE(*unifier.inferred(bType) == *TypeHelper::boolType());
 }
-*/
