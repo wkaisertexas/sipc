@@ -563,8 +563,8 @@ TEST_CASE("TypeConstraintVisitor: array length", "[TypeConstraintVisitor]") {
 TEST_CASE("TypeConstraintVisitor: array indexing", "[TypeConstraintVisitor]") {
   std::stringstream program;
   program << R"(
-      // [[x]] = [int], [[test]] = () -> int
-      test(x) {
+      // [[]] = [int], [[test]] = () -> int
+      test() {
         var a, x, y;
         a = [1, 2, 3];
         x = a[y];
@@ -687,6 +687,7 @@ TEST_CASE("TypeConstraintVisitor: ternery expression",
             // [[b]] = bool, [[test]] = (bool) -> int
             test(b) {
               var x;
+              x = 0;
               return b ? 1 : x;
             }
          )";

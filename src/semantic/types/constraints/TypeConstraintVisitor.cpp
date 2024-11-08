@@ -378,11 +378,8 @@ void TypeConstraintVisitor::endVisit(ASTArrayExpr *element) {
 void TypeConstraintVisitor::endVisit(ASTIndexingExpr *element) {
   constraintHandler->handle(astToVar(element->getIdx()),
                             std::make_shared<TipInt>());
-  auto alpha = std::make_shared<TipAlpha>(element);
   constraintHandler->handle(astToVar(element->getArr()),
-                            std::make_shared<TipArray>(alpha));
-  constraintHandler->handle(astToVar(element), 
-                            alpha);
+                            std::make_shared<TipArray>(astToVar(element)));
 }
 
 /*! \brief Type constraints for array length.
