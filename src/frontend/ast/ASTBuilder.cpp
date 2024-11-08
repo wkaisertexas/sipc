@@ -224,6 +224,12 @@ Any ASTBuilder::visitEqualityExpr(TIPParser::EqualityExprContext *ctx) {
   return "";
 } // LCOV_EXCL_LINE
 
+Any ASTBuilder::visitBoolOps(TIPParser::BoolOpsContext *ctx) {
+  visitBinaryExpr(ctx, opString(ctx->op->getType()));
+  return "";
+} // LCOV_EXCL_LINE
+
+
 Any ASTBuilder::visitParenExpr(TIPParser::ParenExprContext *ctx) {
   visit(ctx->expr());
   // leave visitedExpr from expr unchanged
