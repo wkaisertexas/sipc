@@ -1,6 +1,7 @@
 #include "TypeHelper.h"
 
 #include "TipAlpha.h"
+#include "TipArray.h"
 #include "TipBool.h"
 #include "TipFunction.h"
 #include "TipInt.h"
@@ -24,6 +25,10 @@ std::shared_ptr<TipType> TypeHelper::alphaType(ASTNode *node) {
 
 std::shared_ptr<TipType> TypeHelper::ptrType(std::shared_ptr<TipType> t) {
     return std::make_shared<TipRef>(t);
+}
+
+std::shared_ptr<TipType> TypeHelper::arrayType(std::shared_ptr<TipType> t) {
+    return std::make_shared<TipArray>(t);
 }
 
 std::shared_ptr<TipType> TypeHelper::funType(std::vector<std::shared_ptr<TipType>> p, std::shared_ptr<TipType> r) {

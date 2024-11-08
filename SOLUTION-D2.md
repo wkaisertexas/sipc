@@ -7,9 +7,7 @@ By:
 
 ## Overview
 
-During this deliverable, the Tiny Imperative Programming (TIP) language had the frontend extended to support the SIP language constructs produced by the SIP grammar changes.
-
-We added the following new AST nodes: ASTArrayExpr, ASTArrayLenExpr, ASTBoolExpr, ASTForStmt, ASTIndexingExpr, ASTTerneryExpr, and ASTUpdateStmt.
+During this deliverable, the Tiny Imperative Programming (TIP) language had the frontend extended to support the SIP language constructs produced by the SIP grammar changes. We added the following new AST nodes: ASTArrayExpr, ASTArrayLenExpr, ASTBoolExpr, ASTForStmt, ASTIndexingExpr, ASTTerneryExpr, and ASTUpdateStmt.
 
 ## Workflow
 

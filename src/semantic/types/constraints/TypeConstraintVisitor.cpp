@@ -1,6 +1,7 @@
 #include "TypeConstraintVisitor.h"
 #include "TipAbsentField.h"
 #include "TipAlpha.h"
+#include "TipArray.h"
 #include "TipBool.h"
 #include "TipFunction.h"
 #include "TipInt.h"
@@ -115,7 +116,7 @@ void TypeConstraintVisitor::endVisit(ASTBinaryExpr *element) {
   auto intType = std::make_shared<TipInt>();
   auto boolType = std::make_shared<TipBool>();
 
-  if (op == "+" || op == "-" || op == "*" || op == "/") {
+  if (op == "+" || op == "-" || op == "*" || op == "/" || op == "%") {
     // result type is integer
     constraintHandler->handle(astToVar(element), intType);
   } else {
@@ -321,4 +322,57 @@ void TypeConstraintVisitor::endVisit(ASTErrorStmt *element) {
 void TypeConstraintVisitor::endVisit(ASTUpdateStmt *element) {
   constraintHandler->handle(astToVar(element->getArg()),
                             std::make_shared<TipInt>());
+}
+
+/*! \brief Type constraints for ternery expressions.
+ *
+ * Type rules for "E1 ? E2 : E3":
+ *   [[E1]] = bool
+ *   [[E2]] = [[E3]]
+ */
+void TypeConstraintVisitor::endVisit(ASTTernaryExpr *element) {
+  constraintHandler->handle(astToVar(element->getCondition()),
+                            std::make_shared<TipBool>());
+  constraintHandler->handle(astToVar(element->getThen()),
+                            astToVar(element->getElse()));
+}
+
+/*! \brief Type constraints for array literal.
+ *
+ * Type rules for "A = [E1, E2, ...]":
+ *   [[E_x]] = [[E_x+1]]
+ *   [[A]] = [[[E1]]]
+ */
+void TypeConstraintVisitor::endVisit(ASTArrayExpr *element) {
+  auto elements = element->getElements();
+  for(int i = 0; i < elements.size() - 1; i++) {
+    constraintHandler->handle(astToVar(&*elements[i]), astToVar(&*elements.at(i + 1)));
+  }
+  if(elements.size() > 0) {
+    constraintHandler->handle(astToVar(element), std::make_shared<TipArray>(astToVar(&*elements[0])));
+  }
+}
+
+// INCOMPLETE
+/*! \brief Type constraints for array indexing.
+ *
+ * Type rules for "A[B]":
+ *   [[ A[B] ]] = A[B]
+ */
+void TypeConstraintVisitor::endVisit(ASTIndexingExpr *element) {
+  constraintHandler->handle(astToVar(element->getIdx()),
+                            std::make_shared<TipInt>());
+  
+}
+
+// INCOMPLETE
+/*! \brief Type constraints for array length.
+ *
+ * Type rules for "#E":
+ *   [[#E]] =  int
+ */
+void TypeConstraintVisitor::endVisit(ASTArrayLenExpr *element) {
+  constraintHandler->handle(astToVar(element->getPtr)),
+                            std::make_shared<TipInt>());
+  
 }

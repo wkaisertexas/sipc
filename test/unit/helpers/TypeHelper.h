@@ -10,6 +10,7 @@ class TypeHelper {
 public:
     static std::shared_ptr<TipType> intType();
     static std::shared_ptr<TipType> boolType();
+    static std::shared_ptr<TipType> arrayType(std::shared_ptr<TipType> t);
     static std::shared_ptr<TipType> alphaType(ASTNode *node);
     static std::shared_ptr<TipType> ptrType(std::shared_ptr<TipType> t);
     static std::shared_ptr<TipType> funType(std::vector<std::shared_ptr<TipType>> p, std::shared_ptr<TipType> r);
