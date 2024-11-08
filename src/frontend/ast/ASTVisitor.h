@@ -1,8 +1,6 @@
 #pragma once
 
 #include "AST.h"
-#include "ASTArrayOfExpr.h"
-#include "ASTIndexingExpr.h"
 
 /*! \brief Base class for AST visitors.
  *
@@ -86,4 +84,8 @@ public:
   virtual void endVisit(ASTBlockStmt *element) {}
   virtual bool visit(ASTArrayOfExpr *element) { return true; }
   virtual void endVisit(ASTArrayOfExpr *element) {}
+  virtual bool visit(ASTNotExpr *element) { return true; }
+  virtual void endVisit(ASTNotExpr *element) {}
+    virtual bool visit(ASTNegExpr *element) { return true; }
+  virtual void endVisit(ASTNegExpr *element) {}
 };

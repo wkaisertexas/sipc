@@ -125,6 +125,10 @@ TEST_CASE("ASTPrinterTest: expression printers", "[ASTNodePrint]") {
         x = [1, 2, 3, 4, 5];
         z = x[1];
         z = #x;
+        x = x and y;
+        y = x or y;
+        x = not x;
+        x = -(1+1);
         return 0;
       }
     )";
@@ -145,7 +149,11 @@ TEST_CASE("ASTPrinterTest: expression printers", "[ASTNodePrint]") {
                                     "x ? 1 : 0",
                                     "[1, 2, 3, 4, 5]",
                                     "x[1]",
-                                    "(#x)"};
+                                    "(#x)",
+                                    "(x and y)",
+                                    "(x or y)",
+                                    "(not x)",
+                                    "-((1+1))"};
 
   auto ast = ASTHelper::build_ast(stream);
 

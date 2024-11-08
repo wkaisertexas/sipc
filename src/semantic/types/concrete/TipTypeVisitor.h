@@ -29,6 +29,8 @@ public:
   virtual void endVisit(TipFunction *element) {}
   virtual bool visit(TipInt *element) { return true; }
   virtual void endVisit(TipInt *element) {}
+  virtual bool visit(TipBool *element) { return true; }
+  virtual void endVisit(TipBool *element) {}
   virtual bool visit(TipMu *element) { return true; }
   virtual void endVisit(TipMu *element) {}
   virtual bool visit(TipRecord *element) { return true; }
@@ -39,4 +41,6 @@ public:
   virtual void endVisit(TipRef *element) {}
   virtual bool visit(TipVar *element) { return true; }
   virtual void endVisit(TipVar *element) {}
+  virtual bool visit(TipArray *element) { return true; }
+  virtual void endVisit(TipArray   *element) {}
 };

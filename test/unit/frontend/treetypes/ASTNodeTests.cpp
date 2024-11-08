@@ -737,3 +737,96 @@ TEST_CASE("ASTArrayExprTest: Test methods of AST subtype for arrays.", "[ASTNode
    REQUIRE(expr->getChildren().size() == 3);
 
 }
+
+TEST_CASE("ASTTNotExprTest: Test methods of AST subtype.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo(p) {
+         return not (p + p);
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto expr = ASTHelper::find_node<ASTNotExpr>(ast);
+
+    std::stringstream o1;
+    o1 << *expr->getArg();
+    REQUIRE(o1.str() == "(p+p)");
+
+    REQUIRE(expr->getChildren().size() == 1);
+}
+
+TEST_CASE("ASTTNegExprTest: Test methods of AST subtype.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo(p) {
+         return -(p + p);
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto expr = ASTHelper::find_node<ASTNegExpr>(ast);
+
+    std::stringstream o1;
+    o1 << *expr->getArg();
+    REQUIRE(o1.str() == "(p+p)");
+
+    REQUIRE(expr->getChildren().size() == 1);
+}
+
+TEST_CASE("ASTBinaryExpr (or): Test methods of AST subtype.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo() {
+         var x;
+         x = x or true;
+         return x;
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto expr = ASTHelper::find_node<ASTBinaryExpr>(ast);
+
+    std::stringstream o1;
+    o1 << *expr->getLeft();
+    REQUIRE(o1.str() == "x");
+
+    std::stringstream o2;
+    o2 << *expr->getRight();
+    REQUIRE(o2.str() == "true");
+
+    std::stringstream o3;
+    o3 << expr->getOp();
+    REQUIRE(o3.str() == "or");
+}
+
+
+TEST_CASE("ASTBinaryExpr (and): Test methods of AST subtype.",
+          "[ASTNodes]") {
+    std::stringstream stream;
+    stream << R"(
+      foo() {
+         var x;
+         x = x and true;
+         return x;
+      }
+    )";
+
+    auto ast = ASTHelper::build_ast(stream);
+    auto expr = ASTHelper::find_node<ASTBinaryExpr>(ast);
+
+    std::stringstream o1;
+    o1 << *expr->getLeft();
+    REQUIRE(o1.str() == "x");
+
+    std::stringstream o2;
+    o2 << *expr->getRight();
+    REQUIRE(o2.str() == "true");
+
+    std::stringstream o3;
+    o3 << expr->getOp();
+    REQUIRE(o3.str() == "and");
+}

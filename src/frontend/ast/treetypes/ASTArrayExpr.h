@@ -2,7 +2,7 @@
 
 #include "ASTExpr.h"
 
-/*! \brief Class for boolean literals.
+/*! \brief Class for array literals.
  */
 class ASTArrayExpr : public ASTExpr {
   std::vector<std::shared_ptr<ASTExpr>> ELEMENTS;

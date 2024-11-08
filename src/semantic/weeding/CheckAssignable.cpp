@@ -22,6 +22,16 @@ bool isAssignable(ASTExpr *e) {
       return false;
     }
   }
+  if(dynamic_cast<ASTIndexingExpr *>(e)) {
+    ASTIndexingExpr *index = dynamic_cast<ASTIndexingExpr *>(e);
+    if (dynamic_cast<ASTVariableExpr *>(index->getArr())) {
+      return true;
+    } else if (dynamic_cast<ASTDeRefExpr *>(index->getArr())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   return false;
 }
 
@@ -58,6 +68,28 @@ void CheckAssignable::endVisit(ASTRefExpr *element) {
   std::ostringstream oss;
   oss << "Address of error on line " << element->getLine() << ": ";
   oss << *element->getVar() << " not an l-value\n";
+  throw SemanticError(oss.str());
+}
+
+void CheckAssignable::endVisit(ASTUpdateStmt *element) {
+  LOG_S(1) << "Checking assignability of " << *element;
+
+  if (isAssignable(element->getArg()))
+    return;
+
+  // Assigning through a pointer is also permitted
+  if (dynamic_cast<ASTDeRefExpr *>(element->getArg()))
+    return;
+
+  std::ostringstream oss;
+  oss << "Update error on line " << element->getLine() << ": ";
+  if (dynamic_cast<ASTAccessExpr *>(element->getArg())) {
+    ASTAccessExpr *access = dynamic_cast<ASTAccessExpr *>(element->getArg());
+    oss << *access->getRecord()
+        << " is an expression, and not a variable corresponding to a record\n";
+  } else {
+    oss << *element->getArg() << " not an l-value\n";
+  }
   throw SemanticError(oss.str());
 }
 
