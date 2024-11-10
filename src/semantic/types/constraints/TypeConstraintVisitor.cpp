@@ -339,6 +339,8 @@ void TypeConstraintVisitor::endVisit(ASTTernaryExpr *element) {
                             std::make_shared<TipBool>());
   constraintHandler->handle(astToVar(element->getThen()),
                             astToVar(element->getElse()));
+  constraintHandler->handle(astToVar(element),
+                              astToVar(element->getThen()));
 }
 
 /*! \brief Type constraints for array literal.
@@ -372,14 +374,15 @@ void TypeConstraintVisitor::endVisit(ASTArrayExpr *element) {
  *
  * Type rules for "E1[E2]":
  *   [[E2]] = int 
- *   [[E1]] = [T]
- *   [[ E[E2] ]] = T
+ *   [[E1]] = [ [[ E1[E2] ]] ]
  */  
 void TypeConstraintVisitor::endVisit(ASTIndexingExpr *element) {
   constraintHandler->handle(astToVar(element->getIdx()),
                             std::make_shared<TipInt>());
   constraintHandler->handle(astToVar(element->getArr()),
-                            std::make_shared<TipArray>(astToVar(element)));
+                          std::make_shared<TipArray>(astToVar(element)));
+
+
 }
 
 /*! \brief Type constraints for array length.
@@ -391,8 +394,22 @@ void TypeConstraintVisitor::endVisit(ASTArrayLenExpr *element) {
   constraintHandler->handle(astToVar(element),
                             std::make_shared<TipInt>());
   constraintHandler->handle(astToVar(element->getPtr()),
-                            std::make_shared<TipArray>(std::make_shared<TipAlpha>(element)));
+                            std::make_shared<TipArray>(std::make_shared<TipAlpha>(element->getPtr())));
 }
+
+/*! \brief Type constraints for array of constructor.
+ *
+ * Type rules for "[E1 of E2]":
+ *   [[E1]] = int
+ *   [[ [E1 of E2] ]] = [E2]
+ */
+void TypeConstraintVisitor::endVisit(ASTArrayOfExpr *element) {
+  constraintHandler->handle(astToVar(&*element->getE1()),
+                            std::make_shared<TipInt>());
+  constraintHandler->handle(astToVar(element),
+                            std::make_shared<TipArray>(astToVar(&*element->getE2())));
+}
+
 
 
 /*! \brief Type constraints for not expr.
@@ -428,11 +445,8 @@ void TypeConstraintVisitor::endVisit(ASTNegExpr *element) {
  */
 void TypeConstraintVisitor::endVisit(ASTForStmt *element) {
   if(element->getIterator()) {
-    auto alpha = std::make_shared<TipAlpha>(element);
     constraintHandler->handle(astToVar(element->getIterator()),
-                              std::make_shared<TipArray>(alpha));
-    constraintHandler->handle(astToVar(element->getItem()), 
-                              alpha);
+                              std::make_shared<TipArray>(astToVar(element->getItem())));
   } else {
     constraintHandler->handle(astToVar(element->getItem()),
                             std::make_shared<TipInt>());

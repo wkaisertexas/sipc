@@ -85,6 +85,16 @@ TEST_CASE("Check Assignable: decrement", "[Symbol]") {
 }
 
 
+
+
+TEST_CASE("Check Assignable: for stmt", "[Symbol]") {
+  std::stringstream stream;
+  stream
+      << R"(forstmt() { var x; for(x : [1, 2, 3]) {} return 0; })";
+  auto ast = ASTHelper::build_ast(stream);
+  REQUIRE_NOTHROW(CheckAssignable::check(ast.get()));
+}
+
 /************** the following are expected to fail the check ************/
 
 TEST_CASE("Check Assignable: constant lhs", "[Symbol]") {
@@ -160,4 +170,13 @@ TEST_CASE("Check Assignable: array index requires l-value 1", "[Symbol]") {
   auto ast = ASTHelper::build_ast(stream);
   REQUIRE_THROWS_MATCHES(CheckAssignable::check(ast.get()), SemanticError,
                          ContainsWhat("1[0] not an l-value"));
+}
+
+TEST_CASE("Check Assignable: for stmt requires l-value", "[Symbol]") {
+  std::stringstream stream;
+  stream 
+      << R"(forstmt() { var x; for(1 : [1, 2, 3]) {} return 0; })";
+  auto ast = ASTHelper::build_ast(stream);
+  REQUIRE_THROWS_MATCHES(CheckAssignable::check(ast.get()), SemanticError,
+                         ContainsWhat("1 not an l-value"));
 }

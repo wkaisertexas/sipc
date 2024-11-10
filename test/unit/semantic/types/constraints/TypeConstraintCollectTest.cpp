@@ -311,8 +311,6 @@ TEST_CASE("TypeConstraintVisitor: polymorphic type inference",
 
 }
 
-
-
 TEST_CASE("TypeConstraintVisitor: access expr", "[TypeConstraintVisitor]") {
   std::stringstream program;
   program << R"(
@@ -531,6 +529,67 @@ TEST_CASE("TypeConstraintVisitor: array expr", "[TypeConstraintVisitor]") {
     REQUIRE(*unifier.inferred(aType) == *TypeHelper::arrayType(TypeHelper::intType()));
 }
 
+TEST_CASE("TypeConstraintVisitor: array expr 2", "[TypeConstraintVisitor]") {
+  std::stringstream program;
+  program << R"(
+      // [[x]] = [int], [[test]] = (int) -> int
+      test() {
+        var a, x, y;
+        x = 0;
+        a = [x];
+        a = [y];
+        return y;
+      }
+    )";
+
+    auto unifierSymbols = collectAndSolve(program);
+    auto unifier = unifierSymbols.first;
+    auto symbols = unifierSymbols.second;
+
+    std::vector<std::shared_ptr<TipType>> empty;
+
+    auto fDecl = symbols->getFunction("test");
+    auto fType = std::make_shared<TipVar>(fDecl);
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::intType()));
+
+    auto xType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
+    REQUIRE(*unifier.inferred(xType) == *TypeHelper::intType());
+
+    auto yType = std::make_shared<TipVar>(symbols->getLocal("y", fDecl));
+    REQUIRE(*unifier.inferred(yType) == *TypeHelper::intType());
+
+    auto aType = std::make_shared<TipVar>(symbols->getLocal("a", fDecl));
+    REQUIRE(*unifier.inferred(aType) == *TypeHelper::arrayType(TypeHelper::intType()));
+}
+
+
+TEST_CASE("TypeConstraintVisitor: empty array", "[TypeConstraintVisitor]") {
+  std::stringstream program;
+  program << R"(
+      // [[x]] = [int], [[test]] = (int) -> int
+      test() {
+        var a;
+        a = [1, 2, 3];
+        a = empty();
+        return 1;
+      }
+
+      empty() {
+        return [];
+      }
+    )";
+
+    auto unifierSymbols = collectAndSolve(program);
+    auto unifier = unifierSymbols.first;
+    auto symbols = unifierSymbols.second;
+
+    std::vector<std::shared_ptr<TipType>> empty;
+
+    auto fDecl = symbols->getFunction("empty");
+    auto fType = std::make_shared<TipVar>(fDecl);
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::arrayType(TypeHelper::intType())));
+}
+
 TEST_CASE("TypeConstraintVisitor: array length", "[TypeConstraintVisitor]") {
   std::stringstream program;
   program << R"(
@@ -565,7 +624,8 @@ TEST_CASE("TypeConstraintVisitor: array indexing", "[TypeConstraintVisitor]") {
   program << R"(
       // [[]] = [int], [[test]] = () -> int
       test() {
-        var a, x, y;
+        var a, x;
+        x = 0;
         a = [1, 2, 3];
         x = a[1];
         return x;
@@ -582,16 +642,44 @@ TEST_CASE("TypeConstraintVisitor: array indexing", "[TypeConstraintVisitor]") {
     auto fType = std::make_shared<TipVar>(fDecl);
     REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::intType()));
 
-    auto xType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
-    REQUIRE(*unifier.inferred(xType) == *TypeHelper::intType());
-
-    auto yType = std::make_shared<TipVar>(symbols->getLocal("y", fDecl));
-    REQUIRE(*unifier.inferred(xType) == *TypeHelper::intType());
-
     auto aType = std::make_shared<TipVar>(symbols->getLocal("a", fDecl));
     REQUIRE(*unifier.inferred(aType) == *TypeHelper::arrayType(TypeHelper::intType()));
+
+    auto xType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
+    REQUIRE(*unifier.inferred(xType) == *TypeHelper::intType());
 }
 
+TEST_CASE("TypeConstraintVisitor: array of", "[TypeConstraintVisitor]") {
+  std::stringstream program;
+  program << R"(
+      // [[]] = [int], [[test]] = () -> int
+      test() {
+        var i, x, y;
+        x = [i of true];
+        y = [10 of 1];
+        return 1;
+      }
+    )";
+
+    auto unifierSymbols = collectAndSolve(program);
+    auto unifier = unifierSymbols.first;
+    auto symbols = unifierSymbols.second;
+
+    std::vector<std::shared_ptr<TipType>> empty;
+
+    auto fDecl = symbols->getFunction("test");
+    auto fType = std::make_shared<TipVar>(fDecl);
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::intType()));
+
+    auto iType = std::make_shared<TipVar>(symbols->getLocal("i", fDecl));
+    REQUIRE(*unifier.inferred(iType) == *TypeHelper::intType());
+
+    auto xType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
+    REQUIRE(*unifier.inferred(xType) == *TypeHelper::arrayType(TypeHelper::boolType()));
+
+    auto yType = std::make_shared<TipVar>(symbols->getLocal("y", fDecl));
+    REQUIRE(*unifier.inferred(yType) == *TypeHelper::arrayType(TypeHelper::intType()));
+}
 
 TEST_CASE("TypeConstraintVisitor: boolean assignment",
           "[TypeConstraintVisitor]") {
@@ -658,11 +746,13 @@ TEST_CASE("TypeConstraintVisitor: if statement takes bool",
     program << R"(
             // [[b]] = bool, [[test]] = (bool) -> int
             test(b) {
+              var x;
               if(b) {
-                return 1;
+                x = 1;
               } else {
-                return 2;
+                x = 2;
               }
+              return x;
             }
          )";
 
@@ -686,13 +776,8 @@ TEST_CASE("TypeConstraintVisitor: ternery expression",
     program << R"(
             // [[b]] = bool, [[test]] = (bool) -> int
             test(b) {
-<<<<<<< HEAD
               var x;
-              x = 0;
               return b ? 1 : x;
-=======
-              return b ? 1 : 0;
->>>>>>> 225aaf6424e7500b2aeffb4cc43eb6a5e8cceda5
             }
          )";
 
@@ -719,8 +804,10 @@ TEST_CASE("TypeConstraintVisitor: while statement takes bool",
     program << R"(
             // [[b]] = bool, [[test]] = (bool) -> int
             test(b) {
+              var x;
+              x = 0;
               while(b) {
-                return 1;
+                x = x + 1;
               }
               return 2;
             }
@@ -774,9 +861,7 @@ TEST_CASE("TypeConstraintVisitor: for loop iterator 1",
             test() {
               var a, x;
               a = [1, 2, 3];
-              for(x : a) {
-                return x;
-              }
+              for(x : a) {}
               return 1;
             }
          )";
@@ -792,7 +877,7 @@ TEST_CASE("TypeConstraintVisitor: for loop iterator 1",
     REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::intType()));
 
     auto xType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
-    REQUIRE(*unifier.inferred(xType) == *TypeHelper::boolType());
+    REQUIRE(*unifier.inferred(xType) == *TypeHelper::intType());
 }
 
 TEST_CASE("TypeConstraintVisitor: for loop iterator 2",
@@ -803,9 +888,7 @@ TEST_CASE("TypeConstraintVisitor: for loop iterator 2",
             test() {
               var a, x;
               a = [true, false, true];
-              for(x : a) {
-                return x;
-              }
+              for(x : a) {}
               return true;
             }
          )";
@@ -818,10 +901,10 @@ TEST_CASE("TypeConstraintVisitor: for loop iterator 2",
 
     auto fDecl = symbols->getFunction("test");
     auto fType = std::make_shared<TipVar>(fDecl);
-    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::intType()));
+    REQUIRE(*unifier.inferred(fType) == *TypeHelper::funType(empty, TypeHelper::boolType()));
 
-    auto bType = std::make_shared<TipVar>(symbols->getLocal("b", fDecl));
-    REQUIRE(*unifier.inferred(bType) == *TypeHelper::boolType());
+    auto xType = std::make_shared<TipVar>(symbols->getLocal("x", fDecl));
+    REQUIRE(*unifier.inferred(xType) == *TypeHelper::boolType());
 }
 
 
@@ -833,7 +916,6 @@ TEST_CASE("TypeConstraintVisitor: for loop range",
             test() {
               var x, y, z, w;
               for(x : y..z by w) {
-                return x;
               }
               return 1;
             }
@@ -871,7 +953,6 @@ TEST_CASE("TypeConstraintVisitor: for loop range 2",
             test() {
               var x, y, z;
               for(x : y..z) {
-                return x;
               }
               return 1;
             }
