@@ -11,18 +11,19 @@ In this project, we extended the Tiny Imperative Programming (TIP) language's we
 
 ## Workflow
 
-We started by picking one of the new constructs—the ternary expression—to update in the type checker and weeding pass. This helped us understand what changes were needed. After that, we divided the remaining constructs between us so we could work on them in parallel. We used a shared markdown document to keep track of our progress and coordinate our work.
+We started by picking one of the new constructs—the bool type—to implement. This helped us understand what changes were needed. After that, we divided the remaining constructs between us so we could work on them in parallel. We used a shared markdown document to keep track of our progress and coordinate our work.
 
 ## Challenges
 
 The major problem that we had was that we didn't realize that there needed to be changes to Substitutor and TipCons in order to accomodate the new TipArray variable. This lead to a lot of time wasted looking through the debugger trying to figure out why the unifier was seg-faulting. We eventually figured it out by searching for all instances of a similar type TipRef and realizing that there was unimplemented code. We also had issues with the linker when modifying the weeding pass to 
 
 
-We ended up submitting this project late. This was because we got a decent amount of work done on the project early in the time period and left the last bit til later, not realizing it would be far more time consuming than the rest of the project put together. In the future, we will try to finish the project the first week instead of leaving it for the second.
+We ended up submitting this project late. This was because we got a decent amount of work done on the project early in the time period and left the last bit til later, not realizing it would be far more time consuming than the rest of the project put together. In the future, we will finish the project the first week instead of leaving it for the second.
 
 ## Testing
 
-We wrote tests for each added type and used the coverage report to ensure that coverage was present for each line of added code. Specifically, we added tests in TypeConstraintCollectTest, but also individual tests for TipBool and TipArray as well as a test in UnifierTest. Our strategy was to put as little type information as possible per test program to ensure that the type system is inferring properly. This allowed us to mostly use one test per feature, though some more complex features required more tests to verify they were sound. We used a checklist to ensure every new feature was tested, and we verified it with the coverage report at the end,
+We wrote tests for each added type and used the coverage report to ensure that coverage was present for each line of added code. Specifically, we added tests in TypeConstraintCollectTest, but also individual tests for TipBool and TipArray as well as a test in UnifierTest. We also added tests for the weeding pass in CheckAssignableTest.cpp.
+Our strategy was to put as little type information as possible per test program to ensure that the type system is inferring properly. This allowed us to mostly use one test per feature, though some more complex features required more tests to verify they were sound. We used a checklist to ensure every new feature was tested, and we verified it with the coverage report at the end.
 
 ## Conclusion
 
