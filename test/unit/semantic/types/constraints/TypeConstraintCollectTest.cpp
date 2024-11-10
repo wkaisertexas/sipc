@@ -27,6 +27,12 @@ static std::pair<Unifier, std::shared_ptr<SymbolTable>> collectAndSolve(std::str
 
     auto collected = visitor.getCollectedConstraints();
 
+    std::cout << "\n";
+    for(auto constraint : collected) {
+      std::cout << constraint << "\n";
+    }
+    std::cout << "\n";
+
     Unifier unifier(collected);
     REQUIRE_NOTHROW(unifier.solve());
 
@@ -565,7 +571,8 @@ TEST_CASE("TypeConstraintVisitor: array indexing", "[TypeConstraintVisitor]") {
   program << R"(
       // [[]] = [int], [[test]] = () -> int
       test() {
-        var a, x, y;
+        var a, x;
+        x = 0;
         a = [1, 2, 3];
         x = a[1];
         return x;
@@ -658,11 +665,13 @@ TEST_CASE("TypeConstraintVisitor: if statement takes bool",
     program << R"(
             // [[b]] = bool, [[test]] = (bool) -> int
             test(b) {
+              var x;
               if(b) {
-                return 1;
+                x = 1;
               } else {
-                return 2;
+                x = 2;
               }
+              return x;
             }
          )";
 
@@ -686,13 +695,8 @@ TEST_CASE("TypeConstraintVisitor: ternery expression",
     program << R"(
             // [[b]] = bool, [[test]] = (bool) -> int
             test(b) {
-<<<<<<< HEAD
               var x;
-              x = 0;
               return b ? 1 : x;
-=======
-              return b ? 1 : 0;
->>>>>>> 225aaf6424e7500b2aeffb4cc43eb6a5e8cceda5
             }
          )";
 
@@ -719,8 +723,10 @@ TEST_CASE("TypeConstraintVisitor: while statement takes bool",
     program << R"(
             // [[b]] = bool, [[test]] = (bool) -> int
             test(b) {
+              var x;
+              x = 0;
               while(b) {
-                return 1;
+                x = x + 1;
               }
               return 2;
             }
@@ -774,9 +780,7 @@ TEST_CASE("TypeConstraintVisitor: for loop iterator 1",
             test() {
               var a, x;
               a = [1, 2, 3];
-              for(x : a) {
-                return x;
-              }
+              for(x : a) {}
               return 1;
             }
          )";
@@ -803,9 +807,7 @@ TEST_CASE("TypeConstraintVisitor: for loop iterator 2",
             test() {
               var a, x;
               a = [true, false, true];
-              for(x : a) {
-                return x;
-              }
+              for(x : a) {}
               return true;
             }
          )";
@@ -833,7 +835,6 @@ TEST_CASE("TypeConstraintVisitor: for loop range",
             test() {
               var x, y, z, w;
               for(x : y..z by w) {
-                return x;
               }
               return 1;
             }
@@ -871,7 +872,6 @@ TEST_CASE("TypeConstraintVisitor: for loop range 2",
             test() {
               var x, y, z;
               for(x : y..z) {
-                return x;
               }
               return 1;
             }
