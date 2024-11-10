@@ -6,6 +6,7 @@
 #include "TipInt.h"
 #include "TipMu.h"
 #include "TipRef.h"
+#include "TipArray.h"
 #include "TypeConstraintCollectVisitor.h"
 #include "TypeConstraintUnifyVisitor.h"
 #include "TypeConstraintVisitor.h"
@@ -22,11 +23,12 @@ TEST_CASE("Unifier: Collect and then unify constraints", "[Unifier, Collect]") {
     program << R"(
             // x is int, y is &int, z is int, short is () -> int
             short() {
-              var x, y, z;
+              var x, y, z, w;
               x = input;	
               y = alloc x;
               *y = x;
               z = *y;
+              w = [1, 2, 3];
               return z;
             }
          )";
@@ -45,6 +47,7 @@ TEST_CASE("Unifier: Collect and then unify constraints", "[Unifier, Collect]") {
     auto intType = std::make_shared<TipInt>();
     auto funRetInt = std::make_shared<TipFunction>(emptyParams, intType);
     auto ptrToInt = std::make_shared<TipRef>(intType);
+    auto intArray = std::make_shared<TipArray>(intType);
 
     auto fDecl = symbols->getFunction("short");
     auto fType = std::make_shared<TipVar>(fDecl);
@@ -59,6 +62,9 @@ TEST_CASE("Unifier: Collect and then unify constraints", "[Unifier, Collect]") {
 
     auto zType = std::make_shared<TipVar>(symbols->getLocal("z", fDecl));
     REQUIRE(*unifier.inferred(zType) == *intType);
+
+    auto wType = std::make_shared<TipVar>(symbols->getLocal("w", fDecl));
+    REQUIRE(*unifier.inferred(wType) == *intArray);
   }
 
   SECTION("Test type-safe deref") {

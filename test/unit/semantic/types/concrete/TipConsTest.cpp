@@ -1,3 +1,4 @@
+#include "TipArray.h"
 #include "TipCons.h"
 #include "TipInt.h"
 #include "TipRecord.h"
@@ -33,6 +34,9 @@ TEST_CASE("TipCons: Test doMatch considers constructor type"
   // Ref is cons with 1 argument
   auto tipRef = std::make_shared<TipRef>(tipInt);
 
+  // Array is cons with 1 argument
+  auto tipArray = std::make_shared<TipArray>(tipInt);
+
   // Function with no params is cons with one argument
   auto tipFunction = std::make_shared<TipFunction>(params, tipInt);
 
@@ -48,6 +52,9 @@ TEST_CASE("TipCons: Test doMatch considers constructor type"
   REQUIRE_FALSE(tipRecord->doMatch(tipFunction.get()));
   REQUIRE_FALSE(tipFunction->doMatch(tipRef.get()));
   REQUIRE_FALSE(tipFunction->doMatch(tipRecord.get()));
+  REQUIRE_FALSE(tipArray->doMatch(tipRef.get()));
+  REQUIRE_FALSE(tipArray->doMatch(tipRecord.get()));
+  REQUIRE_FALSE(tipArray->doMatch(tipFunction.get()));
 }
 
 TEST_CASE("TipCons: Test doMatch only works on TipCons"
