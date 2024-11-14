@@ -427,7 +427,7 @@ llvm::Value *ASTBoolExpr::codegen() {
   
   throw std::runtime_error("Boolean expression not implemented yet");
 
-  return llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext),
+  return llvm::ConstantInt::get(llvm::Type::getInt1Ty(llvmContext),
                                 getValue());
 } // LCOV_EXCL_LINE
 
@@ -468,6 +468,18 @@ llvm::Value *ASTBinaryExpr::codegen() {
     auto *cmp = irBuilder.CreateICmpSGT(L, R, "_gttmp");
     return irBuilder.CreateIntCast(
         cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "gttmp");
+  } else if (getOp() == "<") {
+    auto *cmp = irBuilder.CreateICmpSLT(L, R, "_lttmp");
+    return irBuilder.CreateIntCast(
+        cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "lttmp");
+  } else if (getOp() == ">=") {
+    auto *cmp = irBuilder.CreateICmpSGE(L, R, "_getmp");
+    return irBuilder.CreateIntCast(
+        cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "getmp");
+  } else if (getOp() == "<=") {
+    auto *cmp = irBuilder.CreateICmpSLE(L, R, "_letmp");
+    return irBuilder.CreateIntCast(
+        cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "letmp");
   } else if (getOp() == "==") {
     auto *cmp = irBuilder.CreateICmpEQ(L, R, "_eqtmp");
     return irBuilder.CreateIntCast(
@@ -476,8 +488,14 @@ llvm::Value *ASTBinaryExpr::codegen() {
     auto *cmp = irBuilder.CreateICmpNE(L, R, "_neqtmp");
     return irBuilder.CreateIntCast(
         cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "neqtmp");
+  } else if (getOp() == "and") {
+    return irBuilder.CreateAnd(L, R, "andtmp");
+  } else if (getOp() == "or") {
+    return irBuilder.CreateOr(L, R, "ortmp");
+  } else if (getOp() == "%") {
+    return irBuilder.CreateSRem(L, R, "modtmp");
   } else {
-    throw InternalError("Invalid binary operator: " + OP);
+    throw InternalError("Invalid binary operator: " + getOp());
   }
 }
 
@@ -703,10 +721,77 @@ llvm::Value *ASTArrayLenExpr::codegen() {
 llvm::Value *ASTTernaryExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
-  throw std::runtime_error("Ternary expression not implemented yet");
+  llvm::Value *CondV = getCondition()->codegen();
+  if (CondV == nullptr) {
+    throw InternalError(
+        "failed to generate bitcode for the condition of the if statement");
+  }
 
-  return nullptr;
-}
+  // Convert condition to a bool by comparing non-equal to 0.
+  CondV = irBuilder.CreateICmpNE(CondV, llvm::ConstantInt::get(CondV->getType(), 0), "condtmp");
+
+  llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
+
+  /*
+   * Create blocks for the then and else cases.  The then block is first, so
+   * it is inserted in the function in the constructor. The rest of the blocks
+   * need to be inserted explicitly into the functions basic block list
+   * (via a push_back() call).
+   *
+   * Blocks don't need to be contiguous or ordered in
+   * any particular way because we will explicitly branch between them.
+   * This can be optimized to fall through behavior by later passes.
+   */
+  labelNum++; // create shared labels for these BBs
+  llvm::BasicBlock *ThenBB = llvm::BasicBlock::Create(
+      llvmContext, "then" + std::to_string(labelNum), TheFunction);
+  llvm::BasicBlock *ElseBB =
+      llvm::BasicBlock::Create(llvmContext, "else" + std::to_string(labelNum));
+  llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(
+      llvmContext, "ternerymerge" + std::to_string(labelNum));
+
+  irBuilder.CreateCondBr(CondV, ThenBB, ElseBB);
+
+  // Emit then block.
+  irBuilder.SetInsertPoint(ThenBB);
+
+  llvm::Value *ThenV = getThen()->codegen();
+  if (ThenV == nullptr) {
+    throw InternalError(                                  // LCOV_EXCL_LINE
+        "failed to generate bitcode for the then block"); // LCOV_EXCL_LINE
+  }
+
+  irBuilder.CreateBr(MergeBB);
+  ThenBB = irBuilder.GetInsertBlock();
+
+
+  // Emit else block.
+  TheFunction->insert(TheFunction->end(), ElseBB);
+
+  irBuilder.SetInsertPoint(ElseBB);
+
+  llvm::Value *ElseV;
+
+  ElseV = getElse()->codegen();
+  if (ElseV == nullptr) {
+    throw InternalError(                                  // LCOV_EXCL_LINE
+        "failed to generate bitcode for the else block"); // LCOV_EXCL_LINE
+  }
+
+  irBuilder.CreateBr(MergeBB);
+  ElseBB = irBuilder.GetInsertBlock();
+
+  // Emit merge block.
+  TheFunction->insert(TheFunction->end(), MergeBB);
+  irBuilder.SetInsertPoint(MergeBB);
+
+  // Merge values from blocks using a phi node.
+  llvm::PHINode *PN = irBuilder.CreatePHI(ThenV->getType(), 2, "ternarytmp");
+  PN->addIncoming(ThenV, ThenBB);
+  PN->addIncoming(ElseV, ElseBB);
+
+  return PN;
+} // LCOV_EXCL_LINE
 
 /* {field1 : val1, ..., fieldN : valN} record expression
  *
@@ -891,16 +976,32 @@ llvm::Value *ASTBlockStmt::codegen() {
   return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
 } // LCOV_EXCL_LINE
 
-llvm::Value *ASTUpdateStmt::codegen(){
-    LOG_S(1) << "Generating code for " << *this;
+llvm::Value *ASTUpdateStmt::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
 
-    llvm::Value *lastStmt = nullptr;
+  // Generate the argument and make sure it's an l-value.
+  lValueGen = true;
+  llvm::Value *argVal = getArg()->codegen();
+  lValueGen = false;
+  if (argVal == nullptr) {
+    throw InternalError("failed to generate bitcode for the argument in update statement");
+  }
+  
 
-    throw std::runtime_error("Update statement not implemented yet"); 
+  llvm::Value *updatedVal;
+  if (getIncrement()) {
+    // Increment: argVal + 1
+    updatedVal = irBuilder.CreateAdd(argVal, llvm::ConstantInt::get(argVal->getType(), 1), "incval");
+  } else {
+    // Decrement: argVal - 1
+    updatedVal = irBuilder.CreateSub(argVal, llvm::ConstantInt::get(argVal->getType(), 1), "decval");
+  }
 
-    return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+  // Create store.
+  irBuilder.CreateStore(updatedVal, argVal);
+
+  return updatedVal;
 }
-
 /*
  * The code generated for an WhileStmt looks like this:
  *
@@ -1132,16 +1233,34 @@ llvm::Value *ASTReturnStmt::codegen() {
   return irBuilder.CreateRet(argVal);
 }
 
-llvm::Value *ASTNotExpr::codegen(){
+llvm::Value *ASTNotExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
-  llvm::Value *lastStmt = nullptr;
-  throw std::runtime_error("Update statement not implemented yet"); 
-  return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+
+  llvm::Value *argVal = getArg()->codegen();
+  if (argVal == nullptr) {
+      throw InternalError(
+        "failed to generate bitcode for the argument of the not expression");
+  }
+
+  // Convert argVal to 0.
+  argVal = irBuilder.CreateICmpNE(argVal, llvm::ConstantInt::get(llvm::Type::getInt1Ty(llvmContext), 0), "booltmp");
+
+  // Apply the not operation by XOR-ing with 1
+  llvm::Value *NotV = irBuilder.CreateXor(argVal, llvm::ConstantInt::get(llvm::Type::getInt1Ty(llvmContext), 1), "nottmp");
+
+  return NotV;
 }
 
-llvm::Value *ASTNegExpr::codegen(){
+llvm::Value *ASTNegExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
-  llvm::Value *lastStmt = nullptr;
-  throw std::runtime_error("Update statement not implemented yet"); 
-  return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+
+  llvm::Value *argVal = getArg()->codegen();
+  if (argVal == nullptr) {
+    throw InternalError(
+        "failed to generate bitcode for the argument of the negation expression");
+  }
+
+  llvm::Value *negVal = irBuilder.CreateNeg(negVal, "negtmp");
+
+  return negVal;
 }
