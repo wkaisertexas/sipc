@@ -980,32 +980,28 @@ llvm::Value *ASTBlockStmt::codegen() {
 llvm::Value *ASTUpdateStmt::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
-  // Generate the argument and make sure it's an l-value.
-  // lValueGen = true;
-  // llvm::Value *argVal = getArg()->codegen();
-  // lValueGen = false;
-  // if (argVal == nullptr) {
-  //   throw InternalError("failed to generate bitcode for the argument in update statement");
-  // }
-  
+  lValueGen = true;
+  llvm::Value *argVal = getArg()->codegen();
+  lValueGen = false;
+  if (argVal == nullptr) {
+      throw InternalError("Failed to generate bitcode for the argument in update statement");
+  }
 
-  // llvm::Value *updatedVal;
-  // if (getIncrement()) {
-  //   // Increment: argVal + 1
-  //   updatedVal = irBuilder.CreateAdd(argVal, llvm::ConstantInt::get(argVal->getType(), 1), "incval");
-  // } else {
-  //   // Decrement: argVal - 1
-  //   updatedVal = irBuilder.CreateSub(argVal, llvm::ConstantInt::get(argVal->getType(), 1), "decval");
-  // }
+  // Loading the value of the argument -> everything is an int so we are assuming this 
+  llvm::Type *intType = llvm::Type::getInt64Ty(llvmContext);
+  llvm::Value *argValLoaded = irBuilder.CreateLoad(intType, argVal, "loadarg");
 
-  // // Create store.
-  // irBuilder.CreateStore(updatedVal, argVal);
+  llvm::Value *updatedVal;
+  if (getIncrement()) {
+      updatedVal = irBuilder.CreateAdd(argValLoaded, oneV, "incval");
+  } else {
+      updatedVal = irBuilder.CreateSub(argValLoaded, oneV, "decval");
+  }
 
-  // return updatedVal;
-  
-  throw std::runtime_error("Update statement not implemented yet"); 
+  // Storing the updated value into the argument value
+  irBuilder.CreateStore(updatedVal, argVal);
 
-  return nullptr;
+  return updatedVal;
 }
 /*
  * The code generated for an WhileStmt looks like this:
