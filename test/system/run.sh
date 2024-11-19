@@ -45,30 +45,46 @@ do
     rm ${base}
   fi 
   rm $i.bc
-# done
 
-# # Self contained test cases
-# for i in siptests/*.tip
-# do
-#   base="$(basename $i .tip)"
+  # test unoptimized program
+  initialize_test
+  ${TIPC} -do $i
+  ${TIPCLANG} -w $i.bc ${RTLIB}/tip_rtlib.bc -o $base
 
-#   # test optimized program
-#   initialize_test
-#   ${TIPC} $i
-#   ${TIPCLANG} -w $i.bc ${RTLIB}/tip_rtlib.bc -o $base
+  ./${base} &>/dev/null
+  exit_code=${?}
+  if [ ${exit_code} -ne 0 ]; then
+    echo -n "Test failure for : " 
+    echo $i
+    ./${base}
+    ((numfailures++))
+  else 
+    rm ${base}
+  fi 
+  rm $i.bc
+done
 
-#   ./${base} &>/dev/null
-#   exit_code=${?}
-#   if [ ${exit_code} -ne 0 ]; then
-#     echo -n "Test failure for : " 
-#     echo $i
-#     ./${base}
-#     ((numfailures++))
-#   else 
-#     rm ${base}
-#   fi 
-#   rm $i.bc
+# Self contained sip test cases
+for i in siptests/*.sip
+do
+  base="$(basename $i .sip)"
 
+  # test optimized program
+  initialize_test
+  ${TIPC} $i
+  ${TIPCLANG} -w $i.bc ${RTLIB}/tip_rtlib.bc -o $base
+
+  ./${base} &>/dev/null
+  exit_code=${?}
+  if [ ${exit_code} -ne 0 ]; then
+    echo -n "Test failure for : " 
+    echo $i
+    ./${base}
+    ((numfailures++))
+  else 
+    rm ${base}
+  fi 
+  rm $i.bc
 
   # test unoptimized program
   initialize_test
@@ -218,8 +234,6 @@ if [ -s $diffed_graph ]; then
   ((numfailures++))
 fi 
 
-
-
 # Test bad input.
 initialize_test
 nonexistent=$(uuidgen).tip
@@ -252,21 +266,21 @@ do
 done
 
 # Type checking at the system level
-# for i in siptests/*.tip
-# do
-#   initialize_test
-#   base="$(basename $i .tip)"
+for i in siptests/*.sip
+do
+  initialize_test
+  base="$(basename $i .sip)"
 
-#   ${TIPC} -pp -pt $i >${SCRATCH_DIR}/$base.pppt
-#   diff $i.pppt ${SCRATCH_DIR}/$base.pppt >${SCRATCH_DIR}/$base.diff
-#   if [[ -s ${SCRATCH_DIR}/$base.diff ]]
-#   then
-#     echo -n "Test differences for : " 
-#     echo $i
-#     cat ${SCRATCH_DIR}/$base.diff
-#     ((numfailures++))
-#   fi 
-# done
+  ${TIPC} -pp -pt $i >${SCRATCH_DIR}/$base.pppt
+  diff $i.pppt ${SCRATCH_DIR}/$base.pppt >${SCRATCH_DIR}/$base.diff
+  if [[ -s ${SCRATCH_DIR}/$base.diff ]]
+  then
+    echo -n "Test differences for : " 
+    echo $i
+    cat ${SCRATCH_DIR}/$base.diff
+    ((numfailures++))
+  fi 
+done
 
 # Test unwritable output file for both ast and call graph printing
 initialize_test

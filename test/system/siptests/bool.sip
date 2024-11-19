@@ -9,9 +9,9 @@ main() {
   }
 
   if(f) {
-    y = true;
-  } else {
     error 0;
+  } else {
+    y = true;
   }
 
   return 0;
