@@ -1237,23 +1237,12 @@ llvm::Value *ASTReturnStmt::codegen() {
 llvm::Value *ASTNotExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
-  // llvm::Value *argVal = getArg()->codegen();
-  // if (argVal == nullptr) {
-  //     throw InternalError(
-  //       "failed to generate bitcode for the argument of the not expression");
-  // }
+  llvm::Value *argVal = getArg()->codegen();
+  if (argVal == nullptr) {
+      throw InternalError("failed to generate bitcode for the argument of the not expression");
+  }
 
-  // // Convert argVal to 0.
-  // argVal = irBuilder.CreateICmpNE(argVal, llvm::ConstantInt::get(llvm::Type::getInt1Ty(llvmContext), 0), "booltmp");
-
-  // // Apply the not operation by XOR-ing with 1
-  // llvm::Value *NotV = irBuilder.CreateXor(argVal, llvm::ConstantInt::get(llvm::Type::getInt1Ty(llvmContext), 1), "nottmp");
-
-  // return NotV;
-
-  llvm::Value *lastStmt = nullptr;
-  throw std::runtime_error("Update statement not implemented yet"); 
-  return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+  return irBuilder.CreateXor(argVal, oneV, "nottmp");;
 }
 
 llvm::Value *ASTNegExpr::codegen() {
