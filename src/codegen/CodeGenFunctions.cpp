@@ -1246,21 +1246,10 @@ llvm::Value *ASTNotExpr::codegen() {
 }
 
 llvm::Value *ASTNegExpr::codegen() {
-  LOG_S(1) << "Generating code for " << *this;
+  llvm::Value *argVal = getArg()->codegen();
+  if (argVal == nullptr) {
+    throw InternalError("failed to generate bitcode for the argument of the negation expression");
+  }
 
-  llvm::Value *lastStmt = nullptr;
-
-  throw std::runtime_error("Update statement not implemented yet"); 
-
-  return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
-
-  // llvm::Value *argVal = getArg()->codegen();
-  // if (argVal == nullptr) {
-  //   throw InternalError(
-  //       "failed to generate bitcode for the argument of the negation expression");
-  // }
-
-  // llvm::Value *negVal = irBuilder.CreateNeg(negVal, "negtmp");
-
-  // return negVal;
+  return irBuilder.CreateNeg(argVal, "negtmp");;
 }
