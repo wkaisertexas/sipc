@@ -10,14 +10,6 @@ bool TipBool::operator==(const TipType &other) const {
     return true;
   }
 
-  // equals means that it can be unified here
-
-  auto otherIntType = dynamic_cast<TipInt const *>(&other);
-
-  if (otherIntType) {
-    return true;
-  }
-
   return false;
 }
 
