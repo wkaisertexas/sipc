@@ -719,79 +719,75 @@ llvm::Value *ASTArrayLenExpr::codegen() {
 llvm::Value *ASTTernaryExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
-  // llvm::Value *CondV = getCondition()->codegen();
-  // if (CondV == nullptr) {
-  //   throw InternalError(
-  //       "failed to generate bitcode for the condition of the if statement");
-  // }
+  llvm::Value *CondV = getCondition()->codegen();
+  if (CondV == nullptr) {
+    throw InternalError(
+        "failed to generate bitcode for the condition of the if statement");
+  }
 
-  // // Convert condition to a bool by comparing non-equal to 0.
-  // CondV = irBuilder.CreateICmpNE(CondV, llvm::ConstantInt::get(CondV->getType(), 0), "condtmp");
+  // Convert condition to a bool by comparing non-equal to 0.
+  CondV = irBuilder.CreateICmpNE(CondV, llvm::ConstantInt::get(CondV->getType(), 0), "condtmp");
 
-  // llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
+  llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
 
-  // /*
-  //  * Create blocks for the then and else cases.  The then block is first, so
-  //  * it is inserted in the function in the constructor. The rest of the blocks
-  //  * need to be inserted explicitly into the functions basic block list
-  //  * (via a push_back() call).
-  //  *
-  //  * Blocks don't need to be contiguous or ordered in
-  //  * any particular way because we will explicitly branch between them.
-  //  * This can be optimized to fall through behavior by later passes.
-  //  */
-  // labelNum++; // create shared labels for these BBs
-  // llvm::BasicBlock *ThenBB = llvm::BasicBlock::Create(
-  //     llvmContext, "then" + std::to_string(labelNum), TheFunction);
-  // llvm::BasicBlock *ElseBB =
-  //     llvm::BasicBlock::Create(llvmContext, "else" + std::to_string(labelNum));
-  // llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(
-  //     llvmContext, "ternerymerge" + std::to_string(labelNum));
+  /*
+   * Create blocks for the then and else cases.  The then block is first, so
+   * it is inserted in the function in the constructor. The rest of the blocks
+   * need to be inserted explicitly into the functions basic block list
+   * (via a push_back() call).
+   *
+   * Blocks don't need to be contiguous or ordered in
+   * any particular way because we will explicitly branch between them.
+   * This can be optimized to fall through behavior by later passes.
+   */
+  labelNum++; // create shared labels for these BBs
+  llvm::BasicBlock *ThenBB = llvm::BasicBlock::Create(
+      llvmContext, "then" + std::to_string(labelNum), TheFunction);
+  llvm::BasicBlock *ElseBB =
+      llvm::BasicBlock::Create(llvmContext, "else" + std::to_string(labelNum));
+  llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(
+      llvmContext, "ternerymerge" + std::to_string(labelNum));
 
-  // irBuilder.CreateCondBr(CondV, ThenBB, ElseBB);
+  irBuilder.CreateCondBr(CondV, ThenBB, ElseBB);
 
-  // // Emit then block.
-  // irBuilder.SetInsertPoint(ThenBB);
+  // Emit then block.
+  irBuilder.SetInsertPoint(ThenBB);
 
-  // llvm::Value *ThenV = getThen()->codegen();
-  // if (ThenV == nullptr) {
-  //   throw InternalError(                                  // LCOV_EXCL_LINE
-  //       "failed to generate bitcode for the then block"); // LCOV_EXCL_LINE
-  // }
+  llvm::Value *ThenV = getThen()->codegen();
+  if (ThenV == nullptr) {
+    throw InternalError(                                  // LCOV_EXCL_LINE
+        "failed to generate bitcode for the then block"); // LCOV_EXCL_LINE
+  }
 
-  // irBuilder.CreateBr(MergeBB);
-  // ThenBB = irBuilder.GetInsertBlock();
+  irBuilder.CreateBr(MergeBB);
+  ThenBB = irBuilder.GetInsertBlock();
 
+  // Emit else block.
+  TheFunction->insert(TheFunction->end(), ElseBB);
 
-  // // Emit else block.
-  // TheFunction->insert(TheFunction->end(), ElseBB);
+  irBuilder.SetInsertPoint(ElseBB);
 
-  // irBuilder.SetInsertPoint(ElseBB);
+  llvm::Value *ElseV;
 
-  // llvm::Value *ElseV;
+  ElseV = getElse()->codegen();
+  if (ElseV == nullptr) {
+    throw InternalError(                                  // LCOV_EXCL_LINE
+        "failed to generate bitcode for the else block"); // LCOV_EXCL_LINE
+  }
 
-  // ElseV = getElse()->codegen();
-  // if (ElseV == nullptr) {
-  //   throw InternalError(                                  // LCOV_EXCL_LINE
-  //       "failed to generate bitcode for the else block"); // LCOV_EXCL_LINE
-  // }
+  irBuilder.CreateBr(MergeBB);
+  ElseBB = irBuilder.GetInsertBlock();
 
-  // irBuilder.CreateBr(MergeBB);
-  // ElseBB = irBuilder.GetInsertBlock();
+  // Emit merge block.
+  TheFunction->insert(TheFunction->end(), MergeBB);
+  irBuilder.SetInsertPoint(MergeBB);
 
-  // // Emit merge block.
-  // TheFunction->insert(TheFunction->end(), MergeBB);
-  // irBuilder.SetInsertPoint(MergeBB);
+  // Merge values from blocks using a phi node.
+  llvm::PHINode *PhiNode = irBuilder.CreatePHI(ThenV->getType(), 2, "ternarytmp");
+  PhiNode->addIncoming(ThenV, ThenBB);
+  PhiNode->addIncoming(ElseV, ElseBB);
 
-  // // Merge values from blocks using a phi node.
-  // llvm::PHINode *PN = irBuilder.CreatePHI(ThenV->getType(), 2, "ternarytmp");
-  // PN->addIncoming(ThenV, ThenBB);
-  // PN->addIncoming(ElseV, ElseBB);
-
-  // return PN;
-  throw std::runtime_error("Ternary expression not implemented yet");
-
-  return nullptr;
+  return PhiNode;
 } // LCOV_EXCL_LINE
 
 /* {field1 : val1, ..., fieldN : valN} record expression
