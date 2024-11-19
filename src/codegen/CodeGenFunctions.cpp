@@ -466,18 +466,18 @@ llvm::Value *ASTBinaryExpr::codegen() {
     auto *cmp = irBuilder.CreateICmpSGT(L, R, "_gttmp");
     return irBuilder.CreateIntCast(
         cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "gttmp");
-  // } else if (getOp() == "<") {
-  //   auto *cmp = irBuilder.CreateICmpSLT(L, R, "_lttmp");
-  //   return irBuilder.CreateIntCast(
-  //       cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "lttmp");
-  // } else if (getOp() == ">=") {
-  //   auto *cmp = irBuilder.CreateICmpSGE(L, R, "_getmp");
-  //   return irBuilder.CreateIntCast(
-  //       cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "getmp");
-  // } else if (getOp() == "<=") {
-  //   auto *cmp = irBuilder.CreateICmpSLE(L, R, "_letmp");
-  //   return irBuilder.CreateIntCast(
-  //       cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "letmp");
+  } else if (getOp() == "<") {
+    auto *cmp = irBuilder.CreateICmpSLT(L, R, "_lttmp");
+    return irBuilder.CreateIntCast(
+        cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "lttmp");
+  } else if (getOp() == ">=") {
+    auto *cmp = irBuilder.CreateICmpSGE(L, R, "_getmp");
+    return irBuilder.CreateIntCast(
+        cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "getmp");
+  } else if (getOp() == "<=") {
+    auto *cmp = irBuilder.CreateICmpSLE(L, R, "_letmp");
+    return irBuilder.CreateIntCast(
+        cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "letmp");
   } else if (getOp() == "==") {
     auto *cmp = irBuilder.CreateICmpEQ(L, R, "_eqtmp");
     return irBuilder.CreateIntCast(
