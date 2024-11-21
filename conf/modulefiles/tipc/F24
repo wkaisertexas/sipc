@@ -9,7 +9,7 @@ proc ModulesHelp { } {
 module-whatis "Configure the environment for tipc development.\n"
 
 set HOME $::env(HOME)
-set topdir $HOME/tipc
+set topdir $HOME/sipc-kaiser_varma
 
 
 module load $topdir/conf/modulefiles/java/11
