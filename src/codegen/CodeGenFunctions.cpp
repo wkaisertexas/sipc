@@ -451,11 +451,45 @@ llvm::Value *ASTIndexingExpr::codegen() {
       arrayVal, llvm::PointerType::getUnqual(llvm::Type::getInt64Ty(llvmContext)),
       "arrayPtr");
 
+  // Load the length from the first element (index 0)
+  llvm::Value *length = irBuilder.CreateLoad(
+      llvm::Type::getInt64Ty(llvmContext), arrayPtr, "arrayLength");
+
   // Generate code for the index expression
   llvm::Value *indexVal = getIdx()->codegen();
   if (!indexVal) {
     throw InternalError("Failed to generate code for the index expression");
   }
+
+  // Perform bounds checking
+  llvm::Value *zeroConst = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 0);
+  llvm::Value *isIndexNegative = irBuilder.CreateICmpSLT(indexVal, zeroConst, "isIndexNegative");
+  llvm::Value *isIndexTooLarge = irBuilder.CreateICmpSGE(indexVal, length, "isIndexTooLarge");
+  llvm::Value *isOutOfBounds = irBuilder.CreateOr(isIndexNegative, isIndexTooLarge, "isOutOfBounds");
+
+  // Create blocks for in-bounds and out-of-bounds cases
+  llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
+  llvm::BasicBlock *InBoundsBB = llvm::BasicBlock::Create(llvmContext, "inBounds", TheFunction);
+  llvm::BasicBlock *OutOfBoundsBB = llvm::BasicBlock::Create(llvmContext, "outOfBounds", TheFunction);
+  llvm::BasicBlock *ContinueBB = llvm::BasicBlock::Create(llvmContext, "continue", TheFunction);
+
+  irBuilder.CreateCondBr(isOutOfBounds, OutOfBoundsBB, InBoundsBB);
+
+  // Out-of-bounds block
+  irBuilder.SetInsertPoint(OutOfBoundsBB);
+  // Call error function or handle error
+  if (errorIntrinsic == nullptr) {
+    std::vector<llvm::Type *> oneInt(1, llvm::Type::getInt64Ty(llvmContext));
+    auto *FT = llvm::FunctionType::get(llvm::Type::getInt64Ty(llvmContext), oneInt, false);
+    errorIntrinsic = llvm::Function::Create(FT, llvm::Function::ExternalLinkage,
+                                            "_tip_error", CurrentModule.get());
+  }
+  llvm::Value *errorCode = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 0);
+  irBuilder.CreateCall(errorIntrinsic, {errorCode});
+  irBuilder.CreateUnreachable();
+
+  // In-bounds block
+  irBuilder.SetInsertPoint(InBoundsBB);
 
   // Adjust index to skip over the head
   llvm::Value *adjustedIndex = irBuilder.CreateAdd(
@@ -468,11 +502,20 @@ llvm::Value *ASTIndexingExpr::codegen() {
       llvm::Type::getInt64Ty(llvmContext), arrayPtr, adjustedIndex,
       "elementPtr");
 
+  irBuilder.CreateBr(ContinueBB);
+
+  // Continue block
+  // TheFunction->insert(TheFunction->end(), ContinueBB);
+  // TheFunction->getBasicBlockList().push_back(ContinueBB);
+  irBuilder.SetInsertPoint(ContinueBB);
+
   if (lValueGen) {
-    // Return the address (l-value)
-    return elementPtr;
+    // PHI node to select the correct element pointer
+    llvm::PHINode *phiElementPtr = irBuilder.CreatePHI(elementPtr->getType(), 1, "phiElementPtr");
+    phiElementPtr->addIncoming(elementPtr, InBoundsBB);
+    return phiElementPtr;
   } else {
-    // Load and return the value (r-value)
+    // Load and return the value
     llvm::Value *elementVal = irBuilder.CreateLoad(
         llvm::Type::getInt64Ty(llvmContext), elementPtr, "elementVal");
     return elementVal;
