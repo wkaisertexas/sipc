@@ -399,7 +399,7 @@ Any ASTBuilder::visitArrayLiteral(TIPParser::ArrayLiteralContext *ctx) {
 
   visitedExpr = std::make_shared<ASTArrayExpr>(elements);
 
-  LOG_S(1) << "Built AST node " << *visitedStmt;
+  LOG_S(1) << "Built AST node " << *visitedExpr;
 
   // Set source location
   visitedExpr->setLocation(ctx->getStart()->getLine(),
