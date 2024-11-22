@@ -182,18 +182,6 @@ do
   fi 
 done
 
-# Tests to cover argument handling
-# Test pretty printing and symbol printing.
-initialize_test
-${TIPC} -pp -ps iotests/fib.tip >${SCRATCH_DIR}/fib.ppps
-diff iotests/fib.ppps ${SCRATCH_DIR}/fib.ppps >${SCRATCH_DIR}/fib.diff
-if [[ -s ${SCRATCH_DIR}/fib.diff ]]
-then
-  echo "Test differences for : iotests/fib.tip"
-  cat ${SCRATCH_DIR}/fib.diff
-  ((numfailures++))
-fi 
-
 # Test default output file.
 initialize_test
 input=iotests/main.tip

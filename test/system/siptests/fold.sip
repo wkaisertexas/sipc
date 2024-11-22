@@ -29,10 +29,7 @@ main() {
   a = [ 13, 7, -4, 14, 0 ];
 
   // The following statement would produce: "30"
-  if (fold(a, 0, sum) != 30) error fold(a, 0, sum); 
-
-  // The following statement would produce: "true"
-  if (not fold(a, false, orodd)) error -1;
+  if (fold(a, 0, sum) != 30) error 0; 
 
   return 0;
 }

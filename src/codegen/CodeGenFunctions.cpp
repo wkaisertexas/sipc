@@ -1309,7 +1309,77 @@ llvm::Value *ASTForStmt::codegen(){
       IncrementV = llvm::ConstantInt::get(intType, 1);
     }
   } else {
-    throw std::runtime_error("For statements without ranges are not implemented yet.");
+    llvm::Value *arrayVal = getIterator()->codegen();
+    if (!arrayVal) {
+      throw InternalError("Failed to generate code for the array in for statement");
+    }
+
+    llvm::Value *arrayPtr = irBuilder.CreateIntToPtr(
+        arrayVal, llvm::PointerType::getUnqual(intType), "arrayPtr");
+
+    llvm::Value *length = irBuilder.CreateLoad(intType, arrayPtr, "arrayLength");
+
+    llvm::Value *indexPtr = irBuilder.CreateAlloca(intType, nullptr, "indexPtr");
+    irBuilder.CreateStore(zeroV, indexPtr);
+
+    irBuilder.CreateBr(HeaderBB);
+
+    // Emit loop header
+    // {
+      irBuilder.SetInsertPoint(HeaderBB);
+
+      // Load current index
+      llvm::Value *currentIndex = irBuilder.CreateLoad(intType, indexPtr, "currentIndex");
+
+      // Check if index < length
+      llvm::Value *loopCond = irBuilder.CreateICmpSLT(currentIndex, length, "loopCond");
+      irBuilder.CreateCondBr(loopCond, BodyBB, ExitBB);
+    // }
+
+    // Emit loop body
+    // {
+      TheFunction->insert(TheFunction->end(), BodyBB);
+      irBuilder.SetInsertPoint(BodyBB);
+
+      llvm::Value *adjustedIndex = irBuilder.CreateAdd(
+          currentIndex,
+          llvm::ConstantInt::get(intType, 1),
+          "adjustedIndex");
+
+      llvm::Value *elementPtr = irBuilder.CreateGEP(
+          intType, arrayPtr, adjustedIndex, "elementPtr");
+
+      llvm::Value *elementVal = irBuilder.CreateLoad(intType, elementPtr, "elementVal");
+
+      lValueGen = true;
+      llvm::Value *ItemV = getItem()->codegen();
+      lValueGen = false;
+      if (ItemV == nullptr) {
+        throw InternalError("Failed to generate the loop variable in for statement");
+      }
+
+      irBuilder.CreateStore(elementVal, ItemV);
+
+      // Generate the body of the loop
+      llvm::Value *BodyV = getBody()->codegen();
+      if (BodyV == nullptr) {
+        throw InternalError("Failed to generate bitcode for the loop body");
+      }
+
+      // Increment index
+      llvm::Value *nextIndex = irBuilder.CreateAdd(
+          currentIndex,
+          llvm::ConstantInt::get(intType, 1),
+          "nextIndex");
+      irBuilder.CreateStore(nextIndex, indexPtr);
+
+      irBuilder.CreateBr(HeaderBB);
+    // }
+
+    // Emit loop exit block
+    TheFunction->insert(TheFunction->end(), ExitBB);
+    irBuilder.SetInsertPoint(ExitBB);
+    return irBuilder.CreateCall(nop);
   }
 
 
@@ -1318,15 +1388,15 @@ llvm::Value *ASTForStmt::codegen(){
   llvm::Value *ItemV = getItem()->codegen();
   lValueGen = false;
   if (StartV == nullptr) {
-    throw InternalError("Failed to generate the itemfor the range start in for statement");
+    throw InternalError("Failed to generate the item for the range start in for statement");
   }
 
-  // If using range, set ItemV to StartV.
+  //  set ItemV to StartV.
   if(using_range) {
     irBuilder.CreateStore(StartV, ItemV);
   }
 
-  // Add an explicit branch from the current BB to the header
+  // add an explicit branch from the current BB to the header
   irBuilder.CreateBr(HeaderBB);
 
   // Emit loop header
@@ -1370,7 +1440,7 @@ llvm::Value *ASTForStmt::codegen(){
 
   }
 
-  // Emit loop exit block.
+  // emit loop exit block.
   TheFunction->insert(TheFunction->end(), ExitBB);
   irBuilder.SetInsertPoint(ExitBB);
   return irBuilder.CreateCall(nop);

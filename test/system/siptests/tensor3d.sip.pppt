@@ -1,0 +1,54 @@
+hcube3d(d, v) 
+{
+  var t;
+  t = [[[v of d] of d] of d];
+  return t;
+}
+
+sum3d(hcube) 
+{
+  var s, i, j, k;
+  s = 0;
+  for (i : 0..#hcube) 
+    for (j : 0..#hcube[i]) 
+      for (k : 0..#hcube[i][j]) 
+        s = (s + hcube[i][j][k]);
+  return s;
+}
+
+main() 
+{
+  var t1, t2;
+  t1 = hcube3d(3, 1);
+  t2 = hcube3d(4, 2);
+  if ((sum3d(t1) != 27)) 
+    error sum3d(t1);
+  if ((sum3d(t2) != 128)) 
+    error sum3d(t2);
+  return 0;
+}
+
+Functions : {
+  hcube3d : (int,int) -> [[[int]]],
+  main : () -> int,
+  sum3d : ([[[int]]]) -> int
+}
+
+Locals for function hcube3d : {
+  d : int,
+  t : [[[int]]],
+  v : int
+}
+
+Locals for function main : {
+  t1 : [[[int]]],
+  t2 : [[[int]]]
+}
+
+Locals for function sum3d : {
+  hcube : [[[int]]],
+  i : int,
+  j : int,
+  k : int,
+  s : int
+}

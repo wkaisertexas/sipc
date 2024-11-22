@@ -1,0 +1,55 @@
+map(a, f) 
+{
+  var m, i;
+  m = [f(a[0]) of #a];
+  for (i : 0..#a) 
+    {
+      m[i] = f(a[i]);
+    }
+  return m;
+}
+
+ispositive(x) 
+{
+  return (x > 0);
+}
+
+main() 
+{
+  var a, b;
+  a = [13, 7, -4, 14, 0];
+  b = map(a, ispositive);
+  if ((not b[0])) 
+    error 0;
+  if ((not b[1])) 
+    error 0;
+  if (b[2]) 
+    error 0;
+  if ((not b[3])) 
+    error 0;
+  if (b[4]) 
+    error 0;
+  return 0;
+}
+
+Functions : {
+  ispositive : (int) -> bool,
+  main : () -> int,
+  map : ([int],(int) -> bool) -> [bool]
+}
+
+Locals for function ispositive : {
+  x : int
+}
+
+Locals for function main : {
+  a : [int],
+  b : [bool]
+}
+
+Locals for function map : {
+  a : [int],
+  f : (int) -> bool,
+  i : int,
+  m : [bool]
+}

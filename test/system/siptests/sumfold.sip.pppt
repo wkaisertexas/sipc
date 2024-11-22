@@ -9,39 +9,39 @@ fold(a, i, f)
   return s;
 }
 
-orodd(x, y) 
+sum(x, y) 
 {
-  return (x or ((y % 2) != 0));
+  return (x + y);
 }
 
 main() 
 {
   var a;
   a = [13, 7, -4, 14, 0];
-  if ((not fold(a, false, orodd))) 
-    error 0;
+  if ((fold(a, 0, sum) != 30)) 
+    error fold(a, 0, sum);
   return 0;
 }
 
 Functions : {
-  fold : ([int],bool,(bool,int) -> bool) -> bool,
+  fold : ([int],int,(int,int) -> int) -> int,
   main : () -> int,
-  orodd : (bool,int) -> bool
+  sum : (int,int) -> int
 }
 
 Locals for function fold : {
   a : [int],
   e : int,
-  f : (bool,int) -> bool,
-  i : bool,
-  s : bool
+  f : (int,int) -> int,
+  i : int,
+  s : int
 }
 
 Locals for function main : {
   a : [int]
 }
 
-Locals for function orodd : {
-  x : bool,
+Locals for function sum : {
+  x : int,
   y : int
 }
