@@ -1432,12 +1432,11 @@ llvm::Value *ASTForStmt::codegen() {
 
       irBuilder.CreateBr(HeaderBB);
     }
-
-    // Emit loop exit block.
-    TheFunction->insert(TheFunction->end(), ExitBB);
-    irBuilder.SetInsertPoint(ExitBB);
-    return irBuilder.CreateCall(nop);
   }
+  // Emit loop exit block.
+  TheFunction->insert(TheFunction->end(), ExitBB);
+  irBuilder.SetInsertPoint(ExitBB);
+  return irBuilder.CreateCall(nop);
 }
 
 /*

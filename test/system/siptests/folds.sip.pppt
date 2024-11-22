@@ -1,0 +1,58 @@
+fold(a, i, f) 
+{
+  var s, e;
+  s = i;
+  for (e : a) 
+    {
+      s = f(s, e);
+    }
+  return s;
+}
+
+sum(x, y) 
+{
+  return (x + y);
+}
+
+orodd(x, y) 
+{
+  return (x or ((y % 2) != 0));
+}
+
+main() 
+{
+  var a;
+  a = [13, 7, -4, 14, 0];
+  if ((fold(a, 0, sum) != 30)) 
+    error 0;
+  return 0;
+}
+
+Functions : {
+  fold : ([int],int,(int,int) -> int) -> int,
+  main : () -> int,
+  orodd : (bool,int) -> bool,
+  sum : (int,int) -> int
+}
+
+Locals for function fold : {
+  a : [int],
+  e : int,
+  f : (int,int) -> int,
+  i : int,
+  s : int
+}
+
+Locals for function main : {
+  a : [int]
+}
+
+Locals for function orodd : {
+  x : bool,
+  y : int
+}
+
+Locals for function sum : {
+  x : int,
+  y : int
+}
