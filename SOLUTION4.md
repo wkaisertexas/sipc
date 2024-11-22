@@ -27,6 +27,6 @@ In this bug, the l-value of the `x[0]` needs to be found. However, this also gen
 
 ## Testing
 
-A test per unimplemented codegen statement was created to ensure features were working as intended. These tests used the `error` statement as an assertion to check the properties of the generated.
+A test per unimplemented codegen statement was created to ensure features were working as intended. These tests used the `error` statement as an assertion to check the properties of the generated. Finally, sample sip programs from the zip-file located on canvas were also included as tests. All tests which worked out-of-the-box were added first and then the others were debugged one-by-one. All the errors we found were obscure parser errors, not anything related to codegen or typechecking.
 
-Finally, sample sip programs from the zip-file located on canvas were included as tests. First, all test which worked out-of-the-box were added and then debugged one-by-one.
+As always, we double checked the completeness of our tests by using the code coverage report.
