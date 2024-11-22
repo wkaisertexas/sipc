@@ -1,0 +1,65 @@
+sort(a) 
+{
+  var i, j, k, break;
+  for (i : 1..#a) 
+    {
+      k = a[i];
+      j = (i - 1);
+      break = false;
+      while (((j >= 0) and (not break))) 
+        {
+          if ((a[j] > k)) 
+            {
+              a[(j + 1)] = a[j];
+              j--;
+            }
+          else
+            {
+              break = true;
+            }
+        }
+      a[(j + 1)] = k;
+    }
+  return a;
+}
+
+array_median(a) 
+{
+  var s;
+  s = sort(a);
+  return s[(#s / 2)];
+}
+
+main() 
+{
+  var a, m;
+  a = [13, 7, -4, 14, 0];
+  m = array_median(a);
+  if ((m != 7)) 
+    error m;
+  return 0;
+}
+
+Functions : {
+  array_median : ([int]) -> int,
+  main : () -> int,
+  sort : ([int]) -> [int]
+}
+
+Locals for function array_median : {
+  a : [int],
+  s : [int]
+}
+
+Locals for function main : {
+  a : [int],
+  m : int
+}
+
+Locals for function sort : {
+  a : [int],
+  break : bool,
+  i : int,
+  j : int,
+  k : int
+}

@@ -1,5 +1,5 @@
 main(){
-    var x, y, z, j;
+    var x, y, z, j, a, b;
 
     x = [5 of 3];
 
@@ -57,6 +57,17 @@ main(){
     j = [5 of [5 of false]];
 
     if (j[0][0] != false) {
+        error 0;
+    }
+
+    a = 2;
+    b = [a of false];
+
+    if(b[0]) {
+        error 0;
+    }
+
+    if(b[1]) {
         error 0;
     }
 
