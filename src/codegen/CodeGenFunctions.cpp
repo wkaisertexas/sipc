@@ -441,6 +441,8 @@ llvm::Value *ASTIndexingExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
   // Generate code for the array expression
+  bool isLValue = lValueGen;
+  lValueGen = false;
   llvm::Value *arrayVal = getArr()->codegen();
   if (!arrayVal) {
     throw InternalError("Failed to generate code for the array expression");
@@ -457,6 +459,7 @@ llvm::Value *ASTIndexingExpr::codegen() {
 
   // Generate code for the index expression
   llvm::Value *indexVal = getIdx()->codegen();
+  lValueGen = isLValue;
   if (!indexVal) {
     throw InternalError("Failed to generate code for the index expression");
   }
