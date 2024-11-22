@@ -439,11 +439,91 @@ llvm::Value *ASTArrayOfExpr::codegen() {
 
 llvm::Value *ASTIndexingExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
-  
-  throw std::runtime_error("AST indexing expression not implemented yet");
 
-  return nullptr;
-} // LCOV_EXCL_LINE
+  // Generate code for the array expression
+  bool isLValue = lValueGen;
+  lValueGen = false;
+  llvm::Value *arrayVal = getArr()->codegen();
+  if (!arrayVal) {
+    throw InternalError("Failed to generate code for the array expression");
+  }
+
+  // Convert the int64_t representation back to a pointer to int64_t
+  llvm::Value *arrayPtr = irBuilder.CreateIntToPtr(
+      arrayVal, llvm::PointerType::getUnqual(llvm::Type::getInt64Ty(llvmContext)),
+      "arrayPtr");
+
+  // Load the length from the first element (index 0)
+  llvm::Value *length = irBuilder.CreateLoad(
+      llvm::Type::getInt64Ty(llvmContext), arrayPtr, "arrayLength");
+
+  // Generate code for the index expression
+  llvm::Value *indexVal = getIdx()->codegen();
+  lValueGen = isLValue;
+  if (!indexVal) {
+    throw InternalError("Failed to generate code for the index expression");
+  }
+
+  // Perform bounds checking
+  llvm::Value *zeroConst = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 0);
+  llvm::Value *isIndexNegative = irBuilder.CreateICmpSLT(indexVal, zeroConst, "isIndexNegative");
+  llvm::Value *isIndexTooLarge = irBuilder.CreateICmpSGE(indexVal, length, "isIndexTooLarge");
+  llvm::Value *isOutOfBounds = irBuilder.CreateOr(isIndexNegative, isIndexTooLarge, "isOutOfBounds");
+
+  // Create blocks for in-bounds and out-of-bounds cases
+  llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
+  llvm::BasicBlock *InBoundsBB = llvm::BasicBlock::Create(llvmContext, "inBounds", TheFunction);
+  llvm::BasicBlock *OutOfBoundsBB = llvm::BasicBlock::Create(llvmContext, "outOfBounds", TheFunction);
+  llvm::BasicBlock *ContinueBB = llvm::BasicBlock::Create(llvmContext, "continue", TheFunction);
+
+  irBuilder.CreateCondBr(isOutOfBounds, OutOfBoundsBB, InBoundsBB);
+
+  // Out-of-bounds block
+  irBuilder.SetInsertPoint(OutOfBoundsBB);
+  // Call error function or handle error
+  if (errorIntrinsic == nullptr) {
+    std::vector<llvm::Type *> oneInt(1, llvm::Type::getInt64Ty(llvmContext));
+    auto *FT = llvm::FunctionType::get(llvm::Type::getInt64Ty(llvmContext), oneInt, false);
+    errorIntrinsic = llvm::Function::Create(FT, llvm::Function::ExternalLinkage,
+                                            "_tip_error", CurrentModule.get());
+  }
+  llvm::Value *errorCode = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 0);
+  irBuilder.CreateCall(errorIntrinsic, {errorCode});
+  irBuilder.CreateUnreachable();
+
+  // In-bounds block
+  irBuilder.SetInsertPoint(InBoundsBB);
+
+  // Adjust index to skip over the head
+  llvm::Value *adjustedIndex = irBuilder.CreateAdd(
+      indexVal,
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1),
+      "adjustedIndex");
+
+  // Get pointer to the desired element
+  llvm::Value *elementPtr = irBuilder.CreateGEP(
+      llvm::Type::getInt64Ty(llvmContext), arrayPtr, adjustedIndex,
+      "elementPtr");
+
+  irBuilder.CreateBr(ContinueBB);
+
+  // Continue block
+  // TheFunction->insert(TheFunction->end(), ContinueBB);
+  // TheFunction->getBasicBlockList().push_back(ContinueBB);
+  irBuilder.SetInsertPoint(ContinueBB);
+
+  if (lValueGen) {
+    // PHI node to select the correct element pointer
+    llvm::PHINode *phiElementPtr = irBuilder.CreatePHI(elementPtr->getType(), 1, "phiElementPtr");
+    phiElementPtr->addIncoming(elementPtr, InBoundsBB);
+    return phiElementPtr;
+  } else {
+    // Load and return the value
+    llvm::Value *elementVal = irBuilder.CreateLoad(
+        llvm::Type::getInt64Ty(llvmContext), elementPtr, "elementVal");
+    return elementVal;
+  }
+}// LCOV_EXCL_LINE
 
 llvm::Value *ASTBinaryExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
@@ -692,11 +772,34 @@ llvm::Value *ASTDeRefExpr::codegen() {
 }
 
 llvm::Value *ASTArrayExpr::codegen() {
-  // LOG_S(1) << "Generating code for " << *this;
-  
-  throw std::runtime_error("Array expression not implemented yet"); 
+  LOG_S(1) << "Generating code for " << *this;
 
-  return nullptr;  
+  // codegen the elements of the array
+  auto elements = getElements();
+  size_t numElements = elements.size();
+
+  llvm::Value *numItems = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1 + numElements);
+  llvm::Value *sizeOfItem = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 8); // size of int64_t (also the same size as an address)
+
+  llvm::Value *arrayPtr = irBuilder.CreateCall(callocFun, {numItems, sizeOfItem}, "arrayPtr");
+
+  llvm::Value *int64Ptr = irBuilder.CreateBitCast(arrayPtr, llvm::PointerType::get(llvm::Type::getInt64Ty(llvmContext), 0), "int64Ptr");
+
+  llvm::Value *lengthPtr = int64Ptr; // index 0
+  llvm::Value *arraySize = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), numElements);
+  irBuilder.CreateStore(arraySize, lengthPtr);
+
+  for (size_t i = 0; i < numElements; ++i) {
+    llvm::Value *elementValue = elements[i]->codegen();
+    if (!elementValue) {
+      throw InternalError("Failed to generate code for array element");
+    }
+    llvm::Value *index = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), i + 1); // +1 to skip length
+    llvm::Value *elementPtr = irBuilder.CreateInBoundsGEP(llvm::Type::getInt64Ty(llvmContext), int64Ptr, index, "elementPtr");
+    irBuilder.CreateStore(elementValue, elementPtr);
+  }
+
+  return irBuilder.CreatePtrToInt(int64Ptr, llvm::Type::getInt64Ty(llvmContext), "arrayIntVal");
 }
 
 /* '#' array length expression
@@ -704,11 +807,20 @@ llvm::Value *ASTArrayExpr::codegen() {
  * Generates the code for the length of an array
  */
 llvm::Value *ASTArrayLenExpr::codegen() {
-  // LOG_S(1) << "Generating code for " << *this;
-  
-  throw std::runtime_error("Array length expression not implemented yet"); 
+  LOG_S(1) << "Generating code for " << *this;
 
-  return nullptr;  
+  llvm::Value *arrayVal = getPtr()->codegen();
+  if (!arrayVal) {
+    throw InternalError("Failed to generate code for the array expression");
+  }
+
+  llvm::Value *arrayPtr = irBuilder.CreateIntToPtr(
+      arrayVal, llvm::PointerType::get(llvm::Type::getInt64Ty(llvmContext), 0),
+      "arrayPtr");
+
+  llvm::Value *length = irBuilder.CreateLoad(llvm::Type::getInt64Ty(llvmContext), arrayPtr, "arrayLength");
+
+  return length;
 }
 
 /* 
