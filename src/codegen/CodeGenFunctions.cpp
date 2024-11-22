@@ -432,9 +432,93 @@ llvm::Value *ASTBoolExpr::codegen() {
 llvm::Value *ASTArrayOfExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
-  throw std::runtime_error("Array of expression not implemented yet");
+  // E1 is the size of the array
+  llvm::Value *sizeValue = getE1()->codegen();
+  if (!sizeValue) {
+    throw InternalError("Failed to generate code for the size expression in array-of expression");
+  }
 
-  return nullptr;
+  // the number of items or the size of the array to cast is sizeValue + 1 for the header for the length
+  llvm::Value *numItems = irBuilder.CreateAdd(
+      sizeValue,
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1),
+      "numItems");
+
+  // Call calloc to allocate the memory
+  llvm::Value *sizeOfItem = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 8); // size of int64_t
+  llvm::Value *arrayPtr = irBuilder.CreateCall(callocFun, {numItems, sizeOfItem}, "arrayPtr");
+
+  // Cast the array pointer to int64_t*
+  llvm::Value *int64Ptr = irBuilder.CreateBitCast(
+      arrayPtr,
+      llvm::PointerType::get(llvm::Type::getInt64Ty(llvmContext), 0),
+      "int64Ptr");
+
+  // Store the length of the array at index 0
+  irBuilder.CreateStore(sizeValue, int64Ptr);
+
+  // Create an index variable for the loop
+  llvm::Value *indexPtr = irBuilder.CreateAlloca(
+      llvm::Type::getInt64Ty(llvmContext), nullptr, "indexPtr");
+  irBuilder.CreateStore(
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1),
+      indexPtr);
+
+  // Prepare the loop blocks
+  llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
+
+  labelNum++;
+  llvm::BasicBlock *LoopCondBB = llvm::BasicBlock::Create(
+      llvmContext, "loopcond" + std::to_string(labelNum), TheFunction);
+  llvm::BasicBlock *LoopBodyBB = llvm::BasicBlock::Create(
+      llvmContext, "loopbody" + std::to_string(labelNum), TheFunction);
+  llvm::BasicBlock *LoopEndBB = llvm::BasicBlock::Create(
+      llvmContext, "loopend" + std::to_string(labelNum), TheFunction);
+
+  // Jump to the loop condition
+  irBuilder.CreateBr(LoopCondBB);
+
+  // Emit loop condition block
+  irBuilder.SetInsertPoint(LoopCondBB);
+  llvm::Value *currentIndex = irBuilder.CreateLoad(
+      llvm::Type::getInt64Ty(llvmContext), indexPtr, "currentIndex");
+  llvm::Value *loopCond = irBuilder.CreateICmpSLE(
+      currentIndex, sizeValue, "loopCond");
+  irBuilder.CreateCondBr(loopCond, LoopBodyBB, LoopEndBB);
+
+  // Emit loop body block
+  irBuilder.SetInsertPoint(LoopBodyBB);
+
+  // Evaluate E2 for each element
+  llvm::Value *elementValue = getE2()->codegen();
+  if (!elementValue) {
+    throw InternalError("Failed to generate code for the element expression in array-of expression");
+  }
+
+  // Store elementValue into array at index currentIndex
+  llvm::Value *elementPtr = irBuilder.CreateInBoundsGEP(
+      llvm::Type::getInt64Ty(llvmContext),
+      int64Ptr,
+      {currentIndex},
+      "elementPtr");
+  irBuilder.CreateStore(elementValue, elementPtr);
+
+  // Increment the index
+  llvm::Value *nextIndex = irBuilder.CreateAdd(
+      currentIndex,
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1),
+      "nextIndex");
+  irBuilder.CreateStore(nextIndex, indexPtr);
+
+  // Jump back to loop condition
+  irBuilder.CreateBr(LoopCondBB);
+
+  // Emit loop end block
+  irBuilder.SetInsertPoint(LoopEndBB);
+
+  // Return the array pointer casted to int64_t
+  return irBuilder.CreatePtrToInt(
+      int64Ptr, llvm::Type::getInt64Ty(llvmContext), "arrayIntVal");
 } // LCOV_EXCL_LINE
 
 llvm::Value *ASTIndexingExpr::codegen() {
