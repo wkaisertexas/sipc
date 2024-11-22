@@ -440,7 +440,7 @@ llvm::Value *ASTArrayOfExpr::codegen() {
 llvm::Value *ASTIndexingExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
-  // Generate code for the array expression to get the array pointer
+  // Generate code for the array expression
   llvm::Value *arrayVal = getArr()->codegen();
   if (!arrayVal) {
     throw InternalError("Failed to generate code for the array expression");
@@ -448,33 +448,36 @@ llvm::Value *ASTIndexingExpr::codegen() {
 
   // Convert the int64_t representation back to a pointer to int64_t
   llvm::Value *arrayPtr = irBuilder.CreateIntToPtr(
-      arrayVal, llvm::PointerType::get(llvm::Type::getInt64Ty(llvmContext), 0),
+      arrayVal, llvm::PointerType::getUnqual(llvm::Type::getInt64Ty(llvmContext)),
       "arrayPtr");
 
-  // Generate code for the index expression to get the index value
+  // Generate code for the index expression
   llvm::Value *indexVal = getIdx()->codegen();
   if (!indexVal) {
     throw InternalError("Failed to generate code for the index expression");
   }
 
-  // Adjust index to skip over the length at the head of the array
+  // Adjust index to skip over the head
   llvm::Value *adjustedIndex = irBuilder.CreateAdd(
       indexVal,
       llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1),
       "adjustedIndex");
 
   // Get pointer to the desired element
-  llvm::Value *elementPtr = irBuilder.CreateInBoundsGEP(
+  llvm::Value *elementPtr = irBuilder.CreateGEP(
       llvm::Type::getInt64Ty(llvmContext), arrayPtr, adjustedIndex,
       "elementPtr");
 
-  // Load the value from the element pointer
-  llvm::Value *elementVal = irBuilder.CreateLoad(
-      llvm::Type::getInt64Ty(llvmContext), elementPtr, "elementVal");
-
-  // Return the element value
-  return elementVal;
-} // LCOV_EXCL_LINE
+  if (lValueGen) {
+    // Return the address (l-value)
+    return elementPtr;
+  } else {
+    // Load and return the value (r-value)
+    llvm::Value *elementVal = irBuilder.CreateLoad(
+        llvm::Type::getInt64Ty(llvmContext), elementPtr, "elementVal");
+    return elementVal;
+  }
+}// LCOV_EXCL_LINE
 
 llvm::Value *ASTBinaryExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
