@@ -396,12 +396,13 @@ Any ASTBuilder::visitArrayLiteral(TIPParser::ArrayLiteralContext *ctx) {
     visit(ctx->expr(i));
     elements.push_back(visitedExpr);
   }
+
   visitedExpr = std::make_shared<ASTArrayExpr>(elements);
 
   LOG_S(1) << "Built AST node " << *visitedStmt;
 
   // Set source location
-  visitedStmt->setLocation(ctx->getStart()->getLine(),
+  visitedExpr->setLocation(ctx->getStart()->getLine(),
                            ctx->getStart()->getCharPositionInLine());
   return "";
 }
