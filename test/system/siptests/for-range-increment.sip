@@ -1,0 +1,14 @@
+main() {
+  var x, y;
+  x = 0;
+  y = 0;
+  for(y : 1..6 by 2) {
+    x = x + y;
+  }
+
+  if(x != 9) {
+    error 0;
+  }
+
+  return x;
+}
