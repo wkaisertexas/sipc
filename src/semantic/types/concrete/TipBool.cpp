@@ -6,11 +6,11 @@ TipBool::TipBool() {}
 
 bool TipBool::operator==(const TipType &other) const {
   auto otherTipBool = dynamic_cast<TipBool const *>(&other);
-  if (!otherTipBool) {
-    return false;
+  if(otherTipBool){
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 bool TipBool::operator!=(const TipType &other) const {

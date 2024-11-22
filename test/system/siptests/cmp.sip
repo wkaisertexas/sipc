@@ -1,0 +1,54 @@
+main() {
+  var t, f, x, y;
+  t = 1;
+
+  if(t < 0) {
+    error 0;
+  } else {
+    x = 1;
+  }
+
+  if(x > 0) {
+    y = 1;
+  } else {
+    error 0;
+  }
+
+  if(x == 1) {
+    y = 1;
+  } else {
+    error 0;
+  }
+
+  if(x != 1) {
+    error 0;
+  } else {
+    y = 1;
+  }
+
+  if(x <= 1) {
+    y = 1;
+  } else {
+    error 0;
+  }
+
+  if(x >= 1) {
+    y = 1;
+   } else {
+    error 0;
+   }
+
+   if(x >= 1 and true) {
+    y = 1;
+   } else {
+    error 0;
+   }
+
+   if(x >= 1 or false) {
+    y = 1;
+   } else {
+    error 0;
+   }
+
+  return 0;
+}

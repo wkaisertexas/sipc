@@ -1,0 +1,18 @@
+main() 
+{
+  var x;
+  x = [1, 2, 3];
+  if ((#x != 3)) 
+    {
+      error 0;
+    }
+  return 0;
+}
+
+Functions : {
+  main : () -> int
+}
+
+Locals for function main : {
+  x : [int]
+}
