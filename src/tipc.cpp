@@ -60,6 +60,7 @@ static cl::list<Optimization> OptimizationList(
       clEnumVal(ivs, "Inductive Variable Simplify"),
       clEnumVal(inliner, "Module Inliner"),
       clEnumVal(gdce, "Global Dead Code Elimination"),
+      clEnumVal(constmerge, "Constant Merge"),
 			clEnumVal(test, "Test")),
 		cl::cat(TIPcat));
 

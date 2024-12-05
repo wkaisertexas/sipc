@@ -17,6 +17,7 @@
 #include "llvm/Transforms/Scalar/IndVarSimplify.h"
 #include "llvm/Transforms/IPO/ModuleInliner.h"
 #include "llvm/Transforms/IPO/GlobalDCE.h"
+#include "llvm/Transforms/IPO/ConstantMerge.h"
 
 #include "loguru.hpp"
 
@@ -103,9 +104,9 @@ void Optimizer::optimize(llvm::Module *theModule, llvm::cl::list<Optimization> &
     modulePassManager.addPass(llvm::GlobalDCEPass());
   }
 
+  if (contains(constmerge, enabledOpts)) {
+    modulePassManager.addPass(llvm::ConstantMergePass());
+  }
+
   modulePassManager.run(*theModule, moduleAnalysisManager);
-
-  
-
-
 }
