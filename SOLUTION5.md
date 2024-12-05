@@ -75,3 +75,16 @@ I was trying to use auto-vectorization in my code. However, I was having issues 
 ## Testing
 
 The test runner created uses multiple trials (either 50 or 100) to test the differences. The runtime of each sample program was compared with and without the specific optimization. Additionally, all optimizations were compared to the single optimization.
+
+A table was created to compare the optimizations. In this table, the *ablation* study represents the programs performance running every other optimizer besides the tested optimization and comparing this to running all optimizations.
+
+ Outer pipes  Cell padding 
+No sorting
+| Optimization               | Flag       | \# of Trials | Before | After | % Decrease | Ablation Before | Ablation After | % Decrease |
+| -------------------------- | ---------- | ------------ | ------ | ----- | ---------- | --------------- | -------------- | ---------- |
+| Loop Rotation              | looprotate | 20           | 0.33   | 0.31  | 7.98%      | 0.29            | 0.27           | 7.0%       |
+| Constant Merging           | constmerge | 100          | 0.38   | 0.37  | 3.10%      | 0.37            | 0.00           | 100.0%     |
+| Inliner                    | inliner    | 50           | 0.10   | 0.04  | 56.38%     | 0.09            | 0.02           | 78.0%      |
+| Unrolling                  | unroll     | 50           | 0.18   | 0.10  | 46.83%     | 0.18            | 0.10           | 47.2%      |
+| Loop Invariant Elimination | ivs        | 50           | 0.04   | 0.00  | 100.00%    | 0.04            | 0.00           | 100.0%     |
+
