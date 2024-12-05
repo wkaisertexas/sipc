@@ -42,3 +42,4 @@ llvm.sh*
 
 # clangd
 .cache/
+test/benchmarks/loopinv

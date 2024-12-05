@@ -45,7 +45,7 @@ fi
 
 # Test unroll.sip
 echo "Running unroll.sip without the loop unrolling optimization pass"
-${TIPC} unroll.sip
+${TIPC} -do unroll.sip
 ${TIPCLANG} -w unroll.sip.bc ${RTLIB}/tip_rtlib.bc -o unroll
 before_time=$(measure_runtime ./unroll "$@" 2>/dev/null)
 
@@ -63,7 +63,7 @@ fi
 
 # Test loopinv.sip
 echo "Running loopinv.sip without the loop invariant code motion optimization pass"
-${TIPC} loopinv.sip
+${TIPC} -do loopinv.sip
 ${TIPCLANG} -w loopinv.sip.bc ${RTLIB}/tip_rtlib.bc -o loopinv
 before_time=$(measure_runtime ./loopinv "$@" 2>/dev/null)
 
