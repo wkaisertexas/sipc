@@ -8,10 +8,26 @@
 #include "llvm/Transforms/Scalar/SimplifyCFG.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
 
+// Passes from the demo repo.
+#include "llvm/Transforms/Scalar/LICM.h"
+
+// New passes.
+#include "llvm/Transforms/Scalar/SimpleLoopUnswitch.h"
+#include "llvm/Transforms/Scalar/LoopUnrollPass.h"
+
 #include "loguru.hpp"
 
+namespace {
+  bool contains(Optimization o, llvm::cl::list<Optimization> &l) {
+    for (unsigned i = 0; i != l.size(); ++i) {
+      if (o == l[i]) return true;
+    }
+    return false;
+  }
+}
+
 //  Minimal optimization pass using LLVM pass managers
-void Optimizer::optimize(llvm::Module *theModule) {
+void Optimizer::optimize(llvm::Module *theModule, llvm::cl::list<Optimization> &enabledOpts) {
   LOG_S(1) << "Optimizing program " << theModule->getName().str();
 
   // New pass builder
@@ -36,6 +52,7 @@ void Optimizer::optimize(llvm::Module *theModule) {
   // Initiating Function and Module level PassManagers
   llvm::ModulePassManager modulePassManager;
   llvm::FunctionPassManager functionPassManager;
+  llvm::LoopPassManager loopPassManager;
 
   // Adding passes to the pipeline
 
@@ -54,10 +71,28 @@ void Optimizer::optimize(llvm::Module *theModule) {
   // Simplify the control flow graph (deleting unreachable blocks, etc).
   functionPassManager.addPass(llvm::SimplifyCFGPass());
 
+  // Unrolls loops.
+  if (contains(unroll, enabledOpts)) {
+    functionPassManager.addPass(llvm::LoopUnrollPass());
+  }
+
+  // Loop passes.
+  if (contains(licm, enabledOpts)) {
+    loopPassManager.addPass(llvm::LICMPass(llvm::LICMOptions()));  
+  }
+
+
+  if (contains(test, enabledOpts)) {
+    //loopPassManager.addPass(llvm::SimpleLoopUnswitchPass());
+  }
+
+  functionPassManager.addPass(
+    createFunctionToLoopPassAdaptor(std::move(loopPassManager), true));
+
   // Passing the function pass manager to the modulePassManager using a function
   // adaptor, then passing theModule to the ModulePassManager along with
   // ModuleAnalysisManager.
   modulePassManager.addPass(
-      createModuleToFunctionPassAdaptor(std::move(functionPassManager)));
+      createModuleToFunctionPassAdaptor(std::move(functionPassManager), true));
   modulePassManager.run(*theModule, moduleAnalysisManager);
 }

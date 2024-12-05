@@ -52,6 +52,13 @@ static cl::opt<std::string> sourceFile(cl::Positional,
 static cl::opt<std::string> outputfile("o", cl::value_desc("outputfile"),
                                        cl::desc("write output to <outputfile>"),
                                        cl::cat(TIPcat));
+static cl::list<Optimization> OptimizationList(
+		cl::desc("Available Optimizations:"),
+		cl::values(
+			clEnumVal(licm, "Loop Invariant Code Motion"),
+      clEnumVal(unroll, "Loop Unroll"),
+			clEnumVal(test, "Test")),
+		cl::cat(TIPcat));
 
 /*! \brief tipc driver.
  *
@@ -127,7 +134,7 @@ int main(int argc, char *argv[]) {
           CodeGenerator::generate(ast.get(), analysisResults.get(), sourceFile);
 
       if (!disopt) {
-        Optimizer::optimize(llvmModule.get());
+        Optimizer::optimize(llvmModule.get(), OptimizationList);
       }
 
       if (emitHrAsm) {
