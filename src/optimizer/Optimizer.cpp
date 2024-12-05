@@ -15,8 +15,8 @@
 // New passes.
 #include "llvm/Transforms/Scalar/LoopUnrollPass.h"
 #include "llvm/Transforms/Scalar/IndVarSimplify.h"
-#include "llvm/Transforms/IPO/Inliner.h"
 #include "llvm/Transforms/IPO/ModuleInliner.h"
+#include "llvm/Transforms/IPO/GlobalDCE.h"
 
 #include "loguru.hpp"
 
@@ -97,6 +97,10 @@ void Optimizer::optimize(llvm::Module *theModule, llvm::cl::list<Optimization> &
 
   if (contains(inliner, enabledOpts)) {
     modulePassManager.addPass(llvm::ModuleInlinerPass());
+  }
+
+  if (contains(gdce, enabledOpts)) {
+    modulePassManager.addPass(llvm::GlobalDCEPass());
   }
 
   modulePassManager.run(*theModule, moduleAnalysisManager);

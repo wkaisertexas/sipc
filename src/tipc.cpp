@@ -59,6 +59,7 @@ static cl::list<Optimization> OptimizationList(
       clEnumVal(unroll, "Loop Unroll"),
       clEnumVal(ivs, "Inductive Variable Simplify"),
       clEnumVal(inliner, "Module Inliner"),
+      clEnumVal(gdce, "Global Dead Code Elimination"),
 			clEnumVal(test, "Test")),
 		cl::cat(TIPcat));
 
