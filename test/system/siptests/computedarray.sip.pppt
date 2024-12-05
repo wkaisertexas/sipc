@@ -1,0 +1,20 @@
+main() 
+{
+  var a, b;
+  a = [13, 7, -4, 14, 0];
+  b = [a[0] of #a];
+  if ((a[3] != 14)) 
+    error a[3];
+  if ((b[3] != 13)) 
+    error b[3];
+  return 0;
+}
+
+Functions : {
+  main : () -> int
+}
+
+Locals for function main : {
+  a : [int],
+  b : [int]
+}

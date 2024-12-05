@@ -41,6 +41,7 @@ nameDeclaration : IDENTIFIER ;
 expr : expr '(' (expr (',' expr)*)? ')' 	#funAppExpr
      | expr '.' IDENTIFIER 		#accessExpr
      | '*' expr 				#deRefExpr
+     | expr '[' expr ']' #arrayIndexingExpr
      | SUB NUMBER				#negNumber
      | SUB expr                 #negExpr
      | '&' expr					#refExpr
@@ -51,7 +52,6 @@ expr : expr '(' (expr (',' expr)*)? ')' 	#funAppExpr
      | expr op=(GT | LTE | GTE | LT) expr 				#relationalExpr
      | expr op=(EQ | NE) expr 			#equalityExpr
      | expr '?' expr ':' expr   #ternaryExpr
-     | expr '[' expr ']' #arrayIndexingExpr
      | IDENTIFIER				#varExpr
      | NUMBER					#numExpr
      | KINPUT					#inputExpr

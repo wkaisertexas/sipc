@@ -1,0 +1,39 @@
+array_copy(a) 
+{
+  var b, i;
+  b = [a[0] of #a];
+  for (i : 0..#a) 
+    {
+      b[i] = a[i];
+    }
+  return b;
+}
+
+main() 
+{
+  var a, b, x;
+  a = [13, 7, -4, 14, 0];
+  b = array_copy(a);
+  if ((a[1] != b[1])) 
+    error b[1];
+  if ((b[3] != 14)) 
+    error b[3];
+  return 0;
+}
+
+Functions : {
+  array_copy : ([int]) -> [int],
+  main : () -> int
+}
+
+Locals for function array_copy : {
+  a : [int],
+  b : [int],
+  i : int
+}
+
+Locals for function main : {
+  a : [int],
+  b : [int],
+  x : α<x@11:12>
+}

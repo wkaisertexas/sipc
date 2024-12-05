@@ -425,8 +425,6 @@ llvm::Value *ASTNumberExpr::codegen() {
 llvm::Value *ASTBoolExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
   
-  throw std::runtime_error("Boolean expression not implemented yet");
-
   return llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext),
                                 getValue());
 } // LCOV_EXCL_LINE
@@ -434,18 +432,182 @@ llvm::Value *ASTBoolExpr::codegen() {
 llvm::Value *ASTArrayOfExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
-  throw std::runtime_error("Array of expression not implemented yet");
+  // E1 is the size of the array
+  llvm::Value *sizeValue = getE1()->codegen();
+  if (!sizeValue) {
+    throw InternalError("Failed to generate code for the size expression in array-of expression");
+  }
 
-  return nullptr;
+  // the number of items or the size of the array to cast is sizeValue + 1 for the header for the length
+  llvm::Value *numItems = irBuilder.CreateAdd(
+      sizeValue,
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1),
+      "numItems");
+
+  // Call calloc to allocate the memory
+  llvm::Value *sizeOfItem = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 8); // size of int64_t
+  llvm::Value *arrayPtr = irBuilder.CreateCall(callocFun, {numItems, sizeOfItem}, "arrayPtr");
+
+  // Cast the array pointer to int64_t*
+  llvm::Value *int64Ptr = irBuilder.CreateBitCast(
+      arrayPtr,
+      llvm::PointerType::get(llvm::Type::getInt64Ty(llvmContext), 0),
+      "int64Ptr");
+
+  // Store the length of the array at index 0
+  irBuilder.CreateStore(sizeValue, int64Ptr);
+
+  // Create an index variable for the loop
+  llvm::Value *indexPtr = irBuilder.CreateAlloca(
+      llvm::Type::getInt64Ty(llvmContext), nullptr, "indexPtr");
+  irBuilder.CreateStore(
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1),
+      indexPtr);
+
+  // Prepare the loop blocks
+  llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
+
+  labelNum++;
+  llvm::BasicBlock *LoopCondBB = llvm::BasicBlock::Create(
+      llvmContext, "loopcond" + std::to_string(labelNum), TheFunction);
+  llvm::BasicBlock *LoopBodyBB = llvm::BasicBlock::Create(
+      llvmContext, "loopbody" + std::to_string(labelNum), TheFunction);
+  llvm::BasicBlock *LoopEndBB = llvm::BasicBlock::Create(
+      llvmContext, "loopend" + std::to_string(labelNum), TheFunction);
+
+  // Jump to the loop condition
+  irBuilder.CreateBr(LoopCondBB);
+
+  // Emit loop condition block
+  irBuilder.SetInsertPoint(LoopCondBB);
+  llvm::Value *currentIndex = irBuilder.CreateLoad(
+      llvm::Type::getInt64Ty(llvmContext), indexPtr, "currentIndex");
+  llvm::Value *loopCond = irBuilder.CreateICmpSLE(
+      currentIndex, sizeValue, "loopCond");
+  irBuilder.CreateCondBr(loopCond, LoopBodyBB, LoopEndBB);
+
+  // Emit loop body block
+  irBuilder.SetInsertPoint(LoopBodyBB);
+
+  // Evaluate E2 for each element
+  llvm::Value *elementValue = getE2()->codegen();
+  if (!elementValue) {
+    throw InternalError("Failed to generate code for the element expression in array-of expression");
+  }
+
+  // Store elementValue into array at index currentIndex
+  llvm::Value *elementPtr = irBuilder.CreateInBoundsGEP(
+      llvm::Type::getInt64Ty(llvmContext),
+      int64Ptr,
+      {currentIndex},
+      "elementPtr");
+  irBuilder.CreateStore(elementValue, elementPtr);
+
+  // Increment the index
+  llvm::Value *nextIndex = irBuilder.CreateAdd(
+      currentIndex,
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1),
+      "nextIndex");
+  irBuilder.CreateStore(nextIndex, indexPtr);
+
+  // Jump back to loop condition
+  irBuilder.CreateBr(LoopCondBB);
+
+  // Emit loop end block
+  irBuilder.SetInsertPoint(LoopEndBB);
+
+  // Return the array pointer casted to int64_t
+  return irBuilder.CreatePtrToInt(
+      int64Ptr, llvm::Type::getInt64Ty(llvmContext), "arrayIntVal");
 } // LCOV_EXCL_LINE
 
 llvm::Value *ASTIndexingExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
-  
-  throw std::runtime_error("AST indexing expression not implemented yet");
 
-  return nullptr;
-} // LCOV_EXCL_LINE
+  // Generate code for the array expression
+  bool isLValue = lValueGen;
+  lValueGen = false;
+  llvm::Value *arrayVal = getArr()->codegen();
+  if (!arrayVal) {
+    throw InternalError("Failed to generate code for the array expression");
+  }
+
+  // Convert the int64_t representation back to a pointer to int64_t
+  llvm::Value *arrayPtr = irBuilder.CreateIntToPtr(
+      arrayVal, llvm::PointerType::getUnqual(llvm::Type::getInt64Ty(llvmContext)),
+      "arrayPtr");
+
+  // Load the length from the first element (index 0)
+  llvm::Value *length = irBuilder.CreateLoad(
+      llvm::Type::getInt64Ty(llvmContext), arrayPtr, "arrayLength");
+
+  // Generate code for the index expression
+  llvm::Value *indexVal = getIdx()->codegen();
+  lValueGen = isLValue;
+  if (!indexVal) {
+    throw InternalError("Failed to generate code for the index expression");
+  }
+
+  // Perform bounds checking
+  llvm::Value *zeroConst = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 0);
+  llvm::Value *isIndexNegative = irBuilder.CreateICmpSLT(indexVal, zeroConst, "isIndexNegative");
+  llvm::Value *isIndexTooLarge = irBuilder.CreateICmpSGE(indexVal, length, "isIndexTooLarge");
+  llvm::Value *isOutOfBounds = irBuilder.CreateOr(isIndexNegative, isIndexTooLarge, "isOutOfBounds");
+
+  // Create blocks for in-bounds and out-of-bounds cases
+  llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
+  llvm::BasicBlock *InBoundsBB = llvm::BasicBlock::Create(llvmContext, "inBounds", TheFunction);
+  llvm::BasicBlock *OutOfBoundsBB = llvm::BasicBlock::Create(llvmContext, "outOfBounds", TheFunction);
+  llvm::BasicBlock *ContinueBB = llvm::BasicBlock::Create(llvmContext, "continue", TheFunction);
+
+  irBuilder.CreateCondBr(isOutOfBounds, OutOfBoundsBB, InBoundsBB);
+
+  // Out-of-bounds block
+  irBuilder.SetInsertPoint(OutOfBoundsBB);
+  // Call error function or handle error
+  if (errorIntrinsic == nullptr) {
+    std::vector<llvm::Type *> oneInt(1, llvm::Type::getInt64Ty(llvmContext));
+    auto *FT = llvm::FunctionType::get(llvm::Type::getInt64Ty(llvmContext), oneInt, false);
+    errorIntrinsic = llvm::Function::Create(FT, llvm::Function::ExternalLinkage,
+                                            "_tip_error", CurrentModule.get());
+  }
+  llvm::Value *errorCode = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 0);
+  irBuilder.CreateCall(errorIntrinsic, {errorCode});
+  irBuilder.CreateUnreachable();
+
+  // In-bounds block
+  irBuilder.SetInsertPoint(InBoundsBB);
+
+  // Adjust index to skip over the head
+  llvm::Value *adjustedIndex = irBuilder.CreateAdd(
+      indexVal,
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1),
+      "adjustedIndex");
+
+  // Get pointer to the desired element
+  llvm::Value *elementPtr = irBuilder.CreateGEP(
+      llvm::Type::getInt64Ty(llvmContext), arrayPtr, adjustedIndex,
+      "elementPtr");
+
+  irBuilder.CreateBr(ContinueBB);
+
+  // Continue block
+  // TheFunction->insert(TheFunction->end(), ContinueBB);
+  // TheFunction->getBasicBlockList().push_back(ContinueBB);
+  irBuilder.SetInsertPoint(ContinueBB);
+
+  if (lValueGen) {
+    // PHI node to select the correct element pointer
+    llvm::PHINode *phiElementPtr = irBuilder.CreatePHI(elementPtr->getType(), 1, "phiElementPtr");
+    phiElementPtr->addIncoming(elementPtr, InBoundsBB);
+    return phiElementPtr;
+  } else {
+    // Load and return the value
+    llvm::Value *elementVal = irBuilder.CreateLoad(
+        llvm::Type::getInt64Ty(llvmContext), elementPtr, "elementVal");
+    return elementVal;
+  }
+}// LCOV_EXCL_LINE
 
 llvm::Value *ASTBinaryExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
@@ -468,6 +630,18 @@ llvm::Value *ASTBinaryExpr::codegen() {
     auto *cmp = irBuilder.CreateICmpSGT(L, R, "_gttmp");
     return irBuilder.CreateIntCast(
         cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "gttmp");
+  } else if (getOp() == "<") {
+    auto *cmp = irBuilder.CreateICmpSLT(L, R, "_lttmp");
+    return irBuilder.CreateIntCast(
+        cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "lttmp");
+  } else if (getOp() == ">=") {
+    auto *cmp = irBuilder.CreateICmpSGE(L, R, "_getmp");
+    return irBuilder.CreateIntCast(
+        cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "getmp");
+  } else if (getOp() == "<=") {
+    auto *cmp = irBuilder.CreateICmpSLE(L, R, "_letmp");
+    return irBuilder.CreateIntCast(
+        cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "letmp");
   } else if (getOp() == "==") {
     auto *cmp = irBuilder.CreateICmpEQ(L, R, "_eqtmp");
     return irBuilder.CreateIntCast(
@@ -476,8 +650,14 @@ llvm::Value *ASTBinaryExpr::codegen() {
     auto *cmp = irBuilder.CreateICmpNE(L, R, "_neqtmp");
     return irBuilder.CreateIntCast(
         cmp, llvm::IntegerType::getInt64Ty(llvmContext), false, "neqtmp");
+  } else if (getOp() == "and") {
+    return irBuilder.CreateAnd(L, R, "andtmp");
+  } else if (getOp() == "or") {
+    return irBuilder.CreateOr(L, R, "ortmp");
+  } else if (getOp() == "%") {
+    return irBuilder.CreateSRem(L, R, "modtmp");
   } else {
-    throw InternalError("Invalid binary operator: " + OP);
+    throw InternalError("Invalid binary operator: " + getOp());
   }
 }
 
@@ -676,11 +856,34 @@ llvm::Value *ASTDeRefExpr::codegen() {
 }
 
 llvm::Value *ASTArrayExpr::codegen() {
-  // LOG_S(1) << "Generating code for " << *this;
-  
-  throw std::runtime_error("Array expression not implemented yet"); 
+  LOG_S(1) << "Generating code for " << *this;
 
-  return nullptr;  
+  // codegen the elements of the array
+  auto elements = getElements();
+  size_t numElements = elements.size();
+
+  llvm::Value *numItems = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 1 + numElements);
+  llvm::Value *sizeOfItem = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 8); // size of int64_t (also the same size as an address)
+
+  llvm::Value *arrayPtr = irBuilder.CreateCall(callocFun, {numItems, sizeOfItem}, "arrayPtr");
+
+  llvm::Value *int64Ptr = irBuilder.CreateBitCast(arrayPtr, llvm::PointerType::get(llvm::Type::getInt64Ty(llvmContext), 0), "int64Ptr");
+
+  llvm::Value *lengthPtr = int64Ptr; // index 0
+  llvm::Value *arraySize = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), numElements);
+  irBuilder.CreateStore(arraySize, lengthPtr);
+
+  for (size_t i = 0; i < numElements; ++i) {
+    llvm::Value *elementValue = elements[i]->codegen();
+    if (!elementValue) {
+      throw InternalError("Failed to generate code for array element");
+    }
+    llvm::Value *index = llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), i + 1); // +1 to skip length
+    llvm::Value *elementPtr = irBuilder.CreateInBoundsGEP(llvm::Type::getInt64Ty(llvmContext), int64Ptr, index, "elementPtr");
+    irBuilder.CreateStore(elementValue, elementPtr);
+  }
+
+  return irBuilder.CreatePtrToInt(int64Ptr, llvm::Type::getInt64Ty(llvmContext), "arrayIntVal");
 }
 
 /* '#' array length expression
@@ -688,11 +891,20 @@ llvm::Value *ASTArrayExpr::codegen() {
  * Generates the code for the length of an array
  */
 llvm::Value *ASTArrayLenExpr::codegen() {
-  // LOG_S(1) << "Generating code for " << *this;
-  
-  throw std::runtime_error("Array length expression not implemented yet"); 
+  LOG_S(1) << "Generating code for " << *this;
 
-  return nullptr;  
+  llvm::Value *arrayVal = getPtr()->codegen();
+  if (!arrayVal) {
+    throw InternalError("Failed to generate code for the array expression");
+  }
+
+  llvm::Value *arrayPtr = irBuilder.CreateIntToPtr(
+      arrayVal, llvm::PointerType::get(llvm::Type::getInt64Ty(llvmContext), 0),
+      "arrayPtr");
+
+  llvm::Value *length = irBuilder.CreateLoad(llvm::Type::getInt64Ty(llvmContext), arrayPtr, "arrayLength");
+
+  return length;
 }
 
 /* 
@@ -703,10 +915,76 @@ llvm::Value *ASTArrayLenExpr::codegen() {
 llvm::Value *ASTTernaryExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
 
-  throw std::runtime_error("Ternary expression not implemented yet");
+  llvm::Value *CondV = getCondition()->codegen();
+  if (CondV == nullptr) {
+    throw InternalError(
+        "failed to generate bitcode for the condition of the if statement");
+  }
 
-  return nullptr;
-}
+  // Convert condition to a bool by comparing non-equal to 0.
+  CondV = irBuilder.CreateICmpNE(CondV, llvm::ConstantInt::get(CondV->getType(), 0), "condtmp");
+
+  llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
+
+  /*
+   * Create blocks for the then and else cases.  The then block is first, so
+   * it is inserted in the function in the constructor. The rest of the blocks
+   * need to be inserted explicitly into the functions basic block list
+   * (via a push_back() call).
+   *
+   * Blocks don't need to be contiguous or ordered in
+   * any particular way because we will explicitly branch between them.
+   * This can be optimized to fall through behavior by later passes.
+   */
+  labelNum++; // create shared labels for these BBs
+  llvm::BasicBlock *ThenBB = llvm::BasicBlock::Create(
+      llvmContext, "then" + std::to_string(labelNum), TheFunction);
+  llvm::BasicBlock *ElseBB =
+      llvm::BasicBlock::Create(llvmContext, "else" + std::to_string(labelNum));
+  llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(
+      llvmContext, "ternerymerge" + std::to_string(labelNum));
+
+  irBuilder.CreateCondBr(CondV, ThenBB, ElseBB);
+
+  // Emit then block.
+  irBuilder.SetInsertPoint(ThenBB);
+
+  llvm::Value *ThenV = getThen()->codegen();
+  if (ThenV == nullptr) {
+    throw InternalError(                                  // LCOV_EXCL_LINE
+        "failed to generate bitcode for the then block"); // LCOV_EXCL_LINE
+  }
+
+  irBuilder.CreateBr(MergeBB);
+  ThenBB = irBuilder.GetInsertBlock();
+
+  // Emit else block.
+  TheFunction->insert(TheFunction->end(), ElseBB);
+
+  irBuilder.SetInsertPoint(ElseBB);
+
+  llvm::Value *ElseV;
+
+  ElseV = getElse()->codegen();
+  if (ElseV == nullptr) {
+    throw InternalError(                                  // LCOV_EXCL_LINE
+        "failed to generate bitcode for the else block"); // LCOV_EXCL_LINE
+  }
+
+  irBuilder.CreateBr(MergeBB);
+  ElseBB = irBuilder.GetInsertBlock();
+
+  // Emit merge block.
+  TheFunction->insert(TheFunction->end(), MergeBB);
+  irBuilder.SetInsertPoint(MergeBB);
+
+  // Merge values from blocks using a phi node.
+  llvm::PHINode *PhiNode = irBuilder.CreatePHI(ThenV->getType(), 2, "ternarytmp");
+  PhiNode->addIncoming(ThenV, ThenBB);
+  PhiNode->addIncoming(ElseV, ElseBB);
+
+  return PhiNode;
+} // LCOV_EXCL_LINE
 
 /* {field1 : val1, ..., fieldN : valN} record expression
  *
@@ -891,16 +1169,32 @@ llvm::Value *ASTBlockStmt::codegen() {
   return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
 } // LCOV_EXCL_LINE
 
-llvm::Value *ASTUpdateStmt::codegen(){
-    LOG_S(1) << "Generating code for " << *this;
+llvm::Value *ASTUpdateStmt::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
 
-    llvm::Value *lastStmt = nullptr;
+  lValueGen = true;
+  llvm::Value *argVal = getArg()->codegen();
+  lValueGen = false;
+  if (argVal == nullptr) {
+      throw InternalError("Failed to generate bitcode for the argument in update statement");
+  }
 
-    throw std::runtime_error("Update statement not implemented yet"); 
+  // Loading the value of the argument -> everything is an int so we are assuming this 
+  llvm::Type *intType = llvm::Type::getInt64Ty(llvmContext);
+  llvm::Value *argValLoaded = irBuilder.CreateLoad(intType, argVal, "loadarg");
 
-    return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+  llvm::Value *updatedVal;
+  if (getIncrement()) {
+      updatedVal = irBuilder.CreateAdd(argValLoaded, oneV, "incval");
+  } else {
+      updatedVal = irBuilder.CreateSub(argValLoaded, oneV, "decval");
+  }
+
+  // Storing the updated value into the argument value
+  irBuilder.CreateStore(updatedVal, argVal);
+
+  return updatedVal;
 }
-
 /*
  * The code generated for an WhileStmt looks like this:
  *
@@ -923,14 +1217,6 @@ llvm::Value *ASTWhileStmt::codegen() {
 
   llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
 
-  /*
-   * Create blocks for the loop header, body, and exit; HeaderBB is first
-   * so it is added to the function in the constructor.
-   *
-   * Blocks don't need to be contiguous or ordered in
-   * any particular way because we will explicitly branch between them.
-   * This can be optimized by later passes.
-   */
   labelNum++; // create shared labels for these BBs
 
   llvm::BasicBlock *HeaderBB = llvm::BasicBlock::Create(
@@ -980,14 +1266,177 @@ llvm::Value *ASTWhileStmt::codegen() {
   return irBuilder.CreateCall(nop);
 } // LCOV_EXCL_LINE
 
-llvm::Value *ASTForStmt::codegen(){
-    LOG_S(1) << "Generating code for " << *this;
+llvm::Value *ASTForStmt::codegen() {
+  LOG_S(1) << "Generating code for " << *this;
 
-    llvm::Value *lastStmt = nullptr;
+  llvm::Function *TheFunction = irBuilder.GetInsertBlock()->getParent();
 
-    throw std::runtime_error("For statement not implemented yet"); 
+  labelNum++;
 
-    return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+  llvm::BasicBlock *HeaderBB = llvm::BasicBlock::Create(
+      llvmContext, "header" + std::to_string(labelNum), TheFunction);
+  llvm::BasicBlock *BodyBB =
+      llvm::BasicBlock::Create(llvmContext, "body" + std::to_string(labelNum));
+  llvm::BasicBlock *ExitBB =
+      llvm::BasicBlock::Create(llvmContext, "exit" + std::to_string(labelNum));
+  llvm::Type *intType = llvm::Type::getInt64Ty(llvmContext);
+
+  bool using_range = getRangeStart() != nullptr && getRangeEnd() != nullptr;
+
+  // Generate item.
+  lValueGen = true;
+  llvm::Value *ItemV = getItem()->codegen();
+  lValueGen = false;
+  if (ItemV == nullptr) {
+    throw InternalError("Failed to generate the item for the range start in for statement");
+  }
+
+  if(using_range) {
+    // Range + increment option.
+    llvm::Value *StartV;
+    llvm::Value *EndV;
+    llvm::Value *IncrementV = llvm::ConstantInt::get(intType, 1);
+    llvm::Value *CollectionV;
+
+    // Generate start and end.
+    StartV = getRangeStart()->codegen();
+    if (StartV == nullptr) {
+      throw InternalError("Failed to generate bitcode for the range start in for statement");
+    }
+
+    EndV = getRangeEnd()->codegen();
+    if (EndV == nullptr) {
+      throw InternalError("Failed to generate bitcode for the range end in for statement");
+    }
+    
+    // If there's an increment, use that, otherwise just use 1.
+    if(getIncrement() != nullptr) {
+      IncrementV = getIncrement()->codegen();
+      if (IncrementV == nullptr) {
+        throw InternalError("Failed to generate bitcode for the increment in for statement");
+      }
+    }
+
+    // Set ItemV to StartV.
+    irBuilder.CreateStore(StartV, ItemV);
+
+
+    // Add an explicit branch from the current BB to the header
+    irBuilder.CreateBr(HeaderBB);
+
+    // Emit loop header
+    {
+      irBuilder.SetInsertPoint(HeaderBB);
+
+      // Check if item is less than EndV.
+      llvm::Value *CondV = irBuilder.CreateICmpSLT(
+          irBuilder.CreateLoad(intType, ItemV, "loadarg"), 
+          EndV, 
+          "loopcond"
+      );
+      irBuilder.CreateCondBr(CondV, BodyBB, ExitBB);
+    }
+
+    // Emit loop body
+    {
+      TheFunction->insert(TheFunction->end(), BodyBB);
+      irBuilder.SetInsertPoint(BodyBB);
+
+      llvm::Value *BodyV = getBody()->codegen();
+      if (BodyV == nullptr) {
+        throw InternalError(                                 // LCOV_EXCL_LINE
+            "failed to generate bitcode for the loop body"); // LCOV_EXCL_LINE
+      }
+
+      // Increment iterator.
+      llvm::Value *CurrentItemV = irBuilder.CreateLoad(intType, ItemV, "loadarg");
+      llvm::Value *NextItemV = irBuilder.CreateAdd(
+          CurrentItemV, 
+          IncrementV, 
+          "iterator_inc"
+      );
+      irBuilder.CreateStore(NextItemV, ItemV);
+
+      irBuilder.CreateBr(HeaderBB);
+    }
+
+    // Emit loop exit block.
+    TheFunction->insert(TheFunction->end(), ExitBB);
+    irBuilder.SetInsertPoint(ExitBB);
+    return irBuilder.CreateCall(nop);
+  } else {
+    llvm::Value *IteratorV = getIterator()->codegen();
+    if (IteratorV == nullptr) {
+      throw InternalError("Failed to generate bitcode for the iterator in for statement");
+    }
+
+    llvm::AllocaInst *IndexV = irBuilder.CreateAlloca(intType, nullptr, "index");
+    irBuilder.CreateStore(llvm::ConstantInt::get(intType, 1), IndexV);
+
+    // Get array pointe and length.
+    llvm::Value *arrayPtr = irBuilder.CreateIntToPtr(
+      IteratorV, llvm::PointerType::get(llvm::Type::getInt64Ty(llvmContext), 0),
+      "arrayPtr");
+
+    llvm::Value *length = irBuilder.CreateLoad(llvm::Type::getInt64Ty(llvmContext), arrayPtr, "arrayLength");
+
+
+    // Add an explicit branch from the current BB to the header
+    irBuilder.CreateBr(HeaderBB);
+
+    // Emit loop header
+    {
+      irBuilder.SetInsertPoint(HeaderBB);
+
+      // Check if index is less than EndV.
+      llvm::Value *CondV = irBuilder.CreateICmpSLE(
+          irBuilder.CreateLoad(intType, IndexV, "curIndex"), 
+          length, 
+          "loopcond"
+      );
+      irBuilder.CreateCondBr(CondV, BodyBB, ExitBB);
+    }
+
+    // Emit loop body
+    {
+      TheFunction->insert(TheFunction->end(), BodyBB);
+      irBuilder.SetInsertPoint(BodyBB);
+
+      // Get pointer to the desired element
+      llvm::Value *CurrentIndexV = irBuilder.CreateLoad(intType, IndexV, "curIndex");
+
+      llvm::Value *elementPtr = irBuilder.CreateGEP(
+          llvm::Type::getInt64Ty(llvmContext), arrayPtr, CurrentIndexV,
+          "elementPtr");
+
+      llvm::Value *elementValue = irBuilder.CreateLoad(
+        llvm::Type::getInt64Ty(llvmContext),
+        elementPtr,
+        "elementValue");
+
+      irBuilder.CreateStore(elementValue, ItemV);
+
+      llvm::Value *BodyV = getBody()->codegen();
+      if (BodyV == nullptr) {
+        throw InternalError(                                 // LCOV_EXCL_LINE
+            "failed to generate bitcode for the loop body"); // LCOV_EXCL_LINE
+      }
+
+      // Increment index.
+      llvm::Value *NextIndexV = irBuilder.CreateAdd(
+          CurrentIndexV, 
+          llvm::ConstantInt::get(intType, 1), 
+          "iterator_inc"
+      );
+      irBuilder.CreateStore(NextIndexV, IndexV);
+
+      irBuilder.CreateBr(HeaderBB);
+    }
+  }
+  // Emit loop exit block.
+  TheFunction->insert(TheFunction->end(), ExitBB);
+  irBuilder.SetInsertPoint(ExitBB);
+  return irBuilder.CreateCall(nop);
 }
 
 /*
@@ -1132,16 +1581,22 @@ llvm::Value *ASTReturnStmt::codegen() {
   return irBuilder.CreateRet(argVal);
 }
 
-llvm::Value *ASTNotExpr::codegen(){
+llvm::Value *ASTNotExpr::codegen() {
   LOG_S(1) << "Generating code for " << *this;
-  llvm::Value *lastStmt = nullptr;
-  throw std::runtime_error("Update statement not implemented yet"); 
-  return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+
+  llvm::Value *argVal = getArg()->codegen();
+  if (argVal == nullptr) {
+      throw InternalError("failed to generate bitcode for the argument of the not expression");
+  }
+
+  return irBuilder.CreateXor(argVal, oneV, "nottmp");;
 }
 
-llvm::Value *ASTNegExpr::codegen(){
-  LOG_S(1) << "Generating code for " << *this;
-  llvm::Value *lastStmt = nullptr;
-  throw std::runtime_error("Update statement not implemented yet"); 
-  return (lastStmt == nullptr) ? irBuilder.CreateCall(nop) : lastStmt;
+llvm::Value *ASTNegExpr::codegen() {
+  llvm::Value *argVal = getArg()->codegen();
+  if (argVal == nullptr) {
+    throw InternalError("failed to generate bitcode for the argument of the negation expression");
+  }
+
+  return irBuilder.CreateNeg(argVal, "negtmp");;
 }

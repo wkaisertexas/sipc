@@ -1,0 +1,13 @@
+main() {
+  var x;
+  x = 1;
+  x = x == 1 ? 0 : 1;
+
+  if(x == 0){
+    x = 1;
+  } else {
+    error 0;
+  }
+
+  return 0;
+}
