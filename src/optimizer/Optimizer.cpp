@@ -15,6 +15,8 @@
 // New passes.
 #include "llvm/Transforms/Scalar/LoopUnrollPass.h"
 #include "llvm/Transforms/Scalar/IndVarSimplify.h"
+#include "llvm/Transforms/IPO/Inliner.h"
+#include "llvm/Transforms/IPO/ModuleInliner.h"
 
 #include "loguru.hpp"
 
@@ -55,6 +57,7 @@ void Optimizer::optimize(llvm::Module *theModule, llvm::cl::list<Optimization> &
   llvm::FunctionPassManager functionPassManager;
   llvm::LoopPassManager loopPassManager;
 
+
   // Adding passes to the pipeline
 
   // Constructs SSA and is a pre-requisite for many other passes
@@ -77,11 +80,6 @@ void Optimizer::optimize(llvm::Module *theModule, llvm::cl::list<Optimization> &
     functionPassManager.addPass(llvm::LoopUnrollPass());
   }
 
-  // Loop passes.
-  if (contains(licm, enabledOpts)) {
-    loopPassManager.addPass(llvm::LICMPass(llvm::LICMOptions()));  
-  }
-
 
   if (contains(ivs, enabledOpts)) {
     loopPassManager.addPass(llvm::IndVarSimplifyPass());
@@ -90,10 +88,20 @@ void Optimizer::optimize(llvm::Module *theModule, llvm::cl::list<Optimization> &
   functionPassManager.addPass(
     createFunctionToLoopPassAdaptor(std::move(loopPassManager), true));
 
+
   // Passing the function pass manager to the modulePassManager using a function
   // adaptor, then passing theModule to the ModulePassManager along with
   // ModuleAnalysisManager.
   modulePassManager.addPass(
       createModuleToFunctionPassAdaptor(std::move(functionPassManager), true));
+
+  if (contains(inliner, enabledOpts)) {
+    modulePassManager.addPass(llvm::ModuleInlinerPass());
+  }
+
   modulePassManager.run(*theModule, moduleAnalysisManager);
+
+  
+
+
 }
