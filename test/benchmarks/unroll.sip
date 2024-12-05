@@ -1,8 +1,11 @@
-main(x) {
-    var c, i;
+main(n) {
+    var c, i, j;
     c = 0;
-    for(i : 1..1000000000) {
-        c = c + x;
+
+    for(j : 1.. n) {
+        for(i : 1..4) {
+            c = c * 2;
+        }
     }
     return c;
 }
