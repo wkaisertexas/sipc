@@ -44,6 +44,7 @@ run_benchmark() {
   local optimized_flag=$2
   local inp=$3
   local trials=$4
+  local unoptimized_flag=$5
 
   # Unoptimized test.
   echo "Running ${name} without optimizations (${unoptimized_flag})"
@@ -83,11 +84,23 @@ run_benchmark() {
 # Variables
 failed_benchmarks=0
 
+echo "Running benchmarks in isolation"
+
+# Run benchmarks in isolation
+run_benchmark "looprotate" "--looprotate" 750 20 ""
+run_benchmark "constmerge" "--constmerge" 100000000 100 ""
+run_benchmark "inliner" "--inliner" 10000000 50 ""
+run_benchmark "unroll" "--unroll" 10000000 50 ""
+run_benchmark "ivs" "--ivs" 10000000 50 ""
+
+echo "Running bechmarks with all optimizations enabled"
+
 # Run benchmarks
-run_benchmark "constmerge" "--constmerge" 100000000 100
-run_benchmark "inliner" "--inliner" 10000000 50
-run_benchmark "unroll" "--unroll" 10000000 50
-run_benchmark "ivs" "--ivs" 10000000 50
+run_benchmark "looprotate" "--looprotate --unroll" 750 20 "--unroll --inliner --ivs" # using unroll is fair because that is also a significant loop optimization
+run_benchmark "constmerge" "--constmerge --inliner --unroll --ivs --looprotate" 100000000 150 "--inliner --unroll --ivs --looprotate"
+run_benchmark "inliner" "--inliner --unroll --ivs --constmerge --looprotate" 10000000 50 "--unroll --ivs --constmerge --looprotate"
+run_benchmark "unroll" "--unroll --inliner --ivs --constmerge --looprotate" 10000000 50 "--inliner --ivs --constmerge --looprotate"
+run_benchmark "ivs" "--ivs --inliner --unroll --constmerge --looprotate" 10000000 50 "--inliner --unroll --constmerge --looprotate"
 
 echo "Number of failed benchmarks: ${failed_benchmarks}"
 

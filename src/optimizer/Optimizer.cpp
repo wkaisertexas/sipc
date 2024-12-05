@@ -7,6 +7,7 @@
 #include "llvm/Transforms/Scalar/GVN.h"
 #include "llvm/Transforms/Scalar/Reassociate.h"
 #include "llvm/Transforms/Scalar/SimplifyCFG.h"
+#include "llvm/Transforms/Scalar/LoopRotation.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
 
 // Passes from the demo repo.
@@ -18,6 +19,7 @@
 #include "llvm/Transforms/IPO/ModuleInliner.h"
 #include "llvm/Transforms/IPO/GlobalDCE.h"
 #include "llvm/Transforms/IPO/ConstantMerge.h"
+
 
 #include "loguru.hpp"
 
@@ -76,11 +78,15 @@ void Optimizer::optimize(llvm::Module *theModule, llvm::cl::list<Optimization> &
   // Simplify the control flow graph (deleting unreachable blocks, etc).
   functionPassManager.addPass(llvm::SimplifyCFGPass());
 
+  // Rotate loops for better locality
+  if(contains(looprotate, enabledOpts)) {
+    loopPassManager.addPass(llvm::LoopRotatePass());
+  }
+  
   // Unrolls loops.
   if (contains(unroll, enabledOpts)) {
     functionPassManager.addPass(llvm::LoopUnrollPass());
   }
-
 
   if (contains(ivs, enabledOpts)) {
     loopPassManager.addPass(llvm::IndVarSimplifyPass());

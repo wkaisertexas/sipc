@@ -61,7 +61,8 @@ static cl::list<Optimization> OptimizationList(
       clEnumVal(inliner, "Module Inliner"),
       clEnumVal(gdce, "Global Dead Code Elimination"),
       clEnumVal(constmerge, "Constant Merge"),
-			clEnumVal(test, "Test")),
+      clEnumVal(looprotate, "Loop Rotate")
+    ),
 		cl::cat(TIPcat));
 
 /*! \brief tipc driver.
