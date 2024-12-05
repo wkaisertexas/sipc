@@ -61,4 +61,23 @@ else
   ((failed_benchmarks++))
 fi
 
+# Test loopinv.sip
+echo "Running loopinv.sip without the loop invariant code motion optimization pass"
+${TIPC} loopinv.sip
+${TIPCLANG} -w loopinv.sip.bc ${RTLIB}/tip_rtlib.bc -o loopinv
+before_time=$(measure_runtime ./loopinv "$@" 2>/dev/null)
+
+echo "Running loopinv.sip with optimizations"
+${TIPC} --licm loopinv.sip
+${TIPCLANG} -w loopinv.sip.bc ${RTLIB}/tip_rtlib.bc -o loopinv
+
+after_time=$(measure_runtime ./loopinv "$@" 2>/dev/null)
+
+if (( $(echo "$after_time < $before_time" | bc -l) )); then
+  echo "loopinv.sip: passed (before: $before_time s, after: $after_time s)"
+else
+  echo "loopinv.sip: failed (before: $before_time s, after: $after_time s)"
+  ((failed_benchmarks++))
+fi
+
 echo "Number of failed benchmarks: ${failed_benchmarks}"
