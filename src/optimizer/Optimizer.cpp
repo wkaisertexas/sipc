@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Optimizer.h"
 
 #include "llvm/Passes/PassBuilder.h"
@@ -12,8 +13,8 @@
 #include "llvm/Transforms/Scalar/LICM.h"
 
 // New passes.
-#include "llvm/Transforms/Scalar/SimpleLoopUnswitch.h"
 #include "llvm/Transforms/Scalar/LoopUnrollPass.h"
+#include "llvm/Transforms/Scalar/IndVarSimplify.h"
 
 #include "loguru.hpp"
 
@@ -82,8 +83,8 @@ void Optimizer::optimize(llvm::Module *theModule, llvm::cl::list<Optimization> &
   }
 
 
-  if (contains(test, enabledOpts)) {
-    //loopPassManager.addPass(llvm::SimpleLoopUnswitchPass());
+  if (contains(ivs, enabledOpts)) {
+    loopPassManager.addPass(llvm::IndVarSimplifyPass());
   }
 
   functionPassManager.addPass(

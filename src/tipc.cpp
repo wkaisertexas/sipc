@@ -57,6 +57,7 @@ static cl::list<Optimization> OptimizationList(
 		cl::values(
 			clEnumVal(licm, "Loop Invariant Code Motion"),
       clEnumVal(unroll, "Loop Unroll"),
+      clEnumVal(ivs, "Inductive Variable Simplify"),
 			clEnumVal(test, "Test")),
 		cl::cat(TIPcat));
 
