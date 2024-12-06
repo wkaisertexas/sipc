@@ -1,0 +1,13 @@
+double(x) {
+  return x * 2;
+}
+
+main(n) {
+  var i, s;
+  for(i : 0 .. n) {
+    s = s + 3;
+    s = s / 2;
+    s = double(i);
+  }
+  return s;
+}

@@ -1,0 +1,24 @@
+add_two(x) {
+  return x + 2;
+}
+
+a(x) {
+  return x * 2;
+}
+
+b(x) {
+  return x * 3;
+}
+
+c(x) {
+  return x * 4;
+}
+
+main(n) {
+  var x, i;
+  x = 1;
+  for(i : 0 .. n) {
+    x = add_two(x);
+  }
+  return x;
+}
