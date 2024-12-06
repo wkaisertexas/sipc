@@ -9,11 +9,20 @@ By:
 
 In this deliverable, we added a series of code optimization passes to the compiler. To ensure the effectivness of our optimizations, we created microbenchmarks and a benchmark script that checks if the optimizations improved performance, both in isolation and in combination with other optimizations.
 
+Our optimizations were: 
+- Constant Merging: Replaces operations on constants with the constant result.
+- Inliner: Takes calls to simple functions and replaces them with the function contents.
+- Loop Rotation: Gives loops a pre-header and moves the loop condition to the end. This standardizes loops and allows further optimizations.
+- Loop Unrolling: Takes a loop that operations a small constant number of times and replaces it with its contents repeated that number of times.
+- Inductive Variable Simplification: Takes a loop with simple arithmetic loop contents and replaces it with a single arithmetic operation that takes into account the loop length. For example, for(i : 0..n) {x = x + 2} is converted into x = x + 2 * n; 
+
 ## Workflow
 
 When running this, Varun implemented the optimization passes and William wrote the test runner. After initially finding no improvements to these optimizations, the test runner was rewritten to have multiple trials and produce an average runtime instead of a single instance. 
 
 ## Issues
+
+We selected our optimizations by simply trying various options and checking if they changed the generated .ll file. A lot of optimizations didn't work, but eventually we found 5 that did.
 
 Optimizations initially had negative impacts on the performance of the optimizer. However, we determined that it wasn't a problem with our optimizations, rather it was because the some of our tests ran for an invariant number of times. For example:
 
@@ -85,5 +94,5 @@ The table below shows our results. In this table, the *ablation* study represent
 | Constant Merging           | constmerge | 100          | 0.38   | 0.37  | 3.10%      | 0.37            | 0.00           | 100.0%     |
 | Inliner                    | inliner    | 50           | 0.10   | 0.04  | 56.38%     | 0.09            | 0.02           | 78.0%      |
 | Unrolling                  | unroll     | 50           | 0.18   | 0.10  | 46.83%     | 0.18            | 0.10           | 47.2%      |
-| Loop Invariant Elimination | ivs        | 50           | 0.04   | 0.00  | 100.00%    | 0.04            | 0.00           | 100.0%     |
+| Inductive Variant Simplify | ivs        | 50           | 0.04   | 0.00  | 100.00%    | 0.04            | 0.00           | 100.0%     |
 
