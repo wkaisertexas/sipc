@@ -7,15 +7,15 @@ By:
 
 ## Overview
 
-In this deliverable, code optimization passes were added to the compiler. After this, benchmarks were created and ran to ensure a performance improvement.
+In this deliverable, we added a series of code optimization passes to the compiler. To ensure the effectivness of our optimizations, we created microbenchmarks and a benchmark script that checks if the optimizations improved performance, both in isolation and in combination with other optimizations.
 
 ## Workflow
 
-When running this, Varun implemented the optimization passes and then William wrote the test runner. After initially finding no improvements to these optimizations, the test runner was rewritten to have multiple trials.
+When running this, Varun implemented the optimization passes and William wrote the test runner. After initially finding no improvements to these optimizations, the test runner was rewritten to have multiple trials and produce an average runtime instead of a single instance. 
 
 ## Issues
 
-Optimizations initially had negative impacts on the performance of the optimizer. However, in our testing, it was determined that weird interactions with the input variable caused 
+Optimizations initially had negative impacts on the performance of the optimizer. However, we determined that it wasn't a problem with our optimizations, rather it was because the some of our tests ran for an invariant number of times. For example:
 
 ```console
 Running inliner sip without the inliner optimization pass
@@ -68,18 +68,17 @@ main(n) {
 }
 ```
 
-From this information, it was determined that none of our optimization tests should include arguments to main as inputs to functions as this seemed to mess with the optimizer.
+We identified this issue, fixed our tests, and all our optimizations were showing performance increases.
 
-I was trying to use auto-vectorization in my code. However, I was having issues because bounds-checking is automatically applied for each index into a loop. For this reason, the autovectorization passes were unable to vectorize a simple vector addition loop.
+We were trying to use auto-vectorization in my code. However, we were having issues because bounds-checking is automatically applied for each index into a loop. For this reason, the autovectorization passes were unable to vectorize a simple vector addition loop.
 
 ## Testing
 
-The test runner created uses multiple trials (either 50 or 100) to test the differences. The runtime of each sample program was compared with and without the specific optimization. Additionally, all optimizations were compared to the single optimization.
+We wrote a microbenchmark for each optimization. The test runner script (run.sh in /tests/benchmarks) uses multiple trials (either 50 or 100) to produce average runtimes. The average runtime of each microbenchmark was compared with and without the specific optimization. Additionally, all optimizations were compared to the single optimization.
 
-A table was created to compare the optimizations. In this table, the *ablation* study represents the programs performance running every other optimizer besides the tested optimization and comparing this to running all optimizations.
+The table below shows our results. In this table, the *ablation* study represents the programs performance running every other optimization pass besides the tested optimization and comparing this to running all optimizations. This allows us to determine if an optimization improved performance while being used with the other optimizations, not just in isolation. All our optimizations caused performance increases.
 
- Outer pipes  Cell padding 
-No sorting
+
 | Optimization               | Flag       | \# of Trials | Before | After | % Decrease | Ablation Before | Ablation After | % Decrease |
 | -------------------------- | ---------- | ------------ | ------ | ----- | ---------- | --------------- | -------------- | ---------- |
 | Loop Rotation              | looprotate | 20           | 0.33   | 0.31  | 7.98%      | 0.29            | 0.27           | 7.0%       |
