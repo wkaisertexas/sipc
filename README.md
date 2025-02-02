@@ -13,6 +13,22 @@ A compiler from TIP to llvm bitcode
 - [Solution 3: Weeding Pass, Type System, Type Constraints](./SOLUTION3.md)
 - [Solution 4: Code Generation](./SOLUTION4.md)
 
+## SIP Language
+
+The SIP language is a superset of the tip language. The same way all C programs are valid C++ programs, all valid tip programs are valid sip programs.
+
+Added grammar as a part of SIP,
+
+1. Boolean literals (`true` and `false`)
+2. Combining expressions with logical operators
+3. Arrays and array literal syntax
+4. Indexing into an array
+5. Arithmetic negation and modulo support
+6. The addition of the  `>=`, `<`, and `<=` operators
+7. Terries and nested ternaries
+8. Range-style for loops for(a : b) where a is an array
+9. For loops where the range is non-deterministic. For (a in b by 2) where you skip over two elements
+
 ## TIP Language, Interpreter, and Analyzers
 
 TIP is a "Tiny Imperative Programming" language developed by Anders M&#248;ller and Michael I. Schwartzbach for the [Static Program Analysis](https://cs.au.dk/~amoeller/spa/ "Static Program Analysis") lecture notes that they developed for graduate instruction at Aarhus University.
@@ -30,12 +46,15 @@ This project implements `tipc` which compiles TIP programs into LLVM bitcode.  L
 The project uses [GitHub Actions](https://docs.github.com/en/actions) for building and testing and [CodeCov](https://codecov.io) for reporting code and documentation coverage.  The [build-and-test.yml](.github/workflows/build-and-test.yml) file provides details of this process.  If you would prefer to build and test manually then read on.
 
 After cloning this repository you can build the compiler by moving to into the top-level directory and issuing these commands:
-  1. `./bin/bootstrap.sh`
-  2. `. ~/.bashrc`
-  3. `mkdir build`
-  4. `cd build`
-  5. `cmake ..`
-  6. `make`
+
+```bash
+./bin/bootstrap.sh
+. ~/.bashrc
+mkdir build
+cd build
+cmake ..
+make
+```
 
 The build process will download an up to date version of ANTLR4 if needed, build the C++ target for ANTLR4, and then build all of `tipc` including its substantial body of unit tests.  This may take some time - to speed it up use multiple threads in the `make` command, e.g., `make -j6`.
 

@@ -15,7 +15,7 @@ We started by picking one of the new constructs—the bool type—to implement. 
 
 ## Challenges
 
-The major problem that we had was that we didn't realize that there needed to be changes to Substitutor and TipCons in order to accomodate the new TipArray variable. This lead to a lot of time wasted looking through the debugger trying to figure out why the unifier was seg-faulting. We eventually figured it out by searching for all instances of a similar type TipRef and realizing that there was unimplemented code. We also had issues with the linker when modifying the weeding pass to 
+The major problem that we had was that we didn't realize that there needed to be changes to Substitutor and TipCons in order to accommodate the new TipArray variable. This lead to a lot of time wasted looking through the debugger trying to figure out why the unifier was seg-faulting. We eventually figured it out by searching for all instances of a similar type TipRef and realizing that there was unimplemented code. We also had issues with the linker when modifying the weeding pass to 
 
 
 We ended up submitting this project late. This was because we got a decent amount of work done on the project early in the time period and left the last bit til later, not realizing it would be far more time consuming than the rest of the project put together. In the future, we will finish the project the first week instead of leaving it for the second.
@@ -27,4 +27,4 @@ Our strategy was to put as little type information as possible per test program 
 
 ## Conclusion
 
-By the end of this deliverable, we successfully extended the TIP language to support the new SIP constructs in both the weeding pass and the type system. Despite some tough challenges, especially with the substitutor causing segmentation faults, we managed to figure them out and get everything working. Our thorough testing gave us confidence that the new features are correctly integrated into the compiler.
+By the end of this deliverable, we successfully extended the TIP language to support the new SIP constructs in both the weeding pass and the type system. Despite some tough challenges, especially with the substituter causing segmentation faults, we managed to figure them out and get everything working. Our thorough testing gave us confidence that the new features are correctly integrated into the compiler.

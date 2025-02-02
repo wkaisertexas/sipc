@@ -11,7 +11,7 @@ During this project, the Tiny Imperative Programming (TIP) Language had the gram
 
 ## Challenges
 
-When developing the grammar, we tried to add the ternery expression as a seperate rule like `recordExpr` or `arrayExpr`, but that caused left-recursion issues. We added the ternary rule directly to the `expr` rule to fix the prbolem. We also had the tendency to be too specific when writing the grammar for operators, but we realized that just using `expr` for most things is better.
+When developing the grammar, we tried to add the ternary expression as a separate rule like `recordExpr` or `arrayExpr`, but that caused left-recursion issues. We added the ternary rule directly to the `expr` rule to fix the problem. We also had the tendency to be too specific when writing the grammar for operators, but we realized that just using `expr` for most things is better.
 
 ```console
 expr : expr '(' (expr (',' expr)*)? ')' 	#funAppExpr
@@ -64,4 +64,4 @@ A markdown file [Deliverable 1](./docs/deliverables/deliverable1.md) was used as
 
 We had a little trouble getting the operator precedence tests to work because they required the expected strings to be very exact, but we solved that by just printing the full tree outputs and viewing the proper syntax. Because of our tests, we were able to find and fix bugs with negation precedence.
 
-We think our testing is complete because all the instances of each new feature were tested for parsibility. We also added various precedence tests for each type of new operator. We added a bunch of new tests for the new unary and ternery operators, but for the new binary operators we mostly showed precedence equivalence with other already added binary operators. If we know they are equivalent, then any errors with the new binary operaetors will fail the existing binary operator tests in the TIPC parser unit tests. 
+We think our testing is complete because all the instances of each new feature were tested for passibility. We also added various precedence tests for each type of new operator. We added a bunch of new tests for the new unary and ternary operators, but for the new binary operators we mostly showed precedence equivalence with other already added binary operators. If we know they are equivalent, then any errors with the new binary operators will fail the existing binary operator tests in the TIPC parser unit tests. 

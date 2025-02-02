@@ -7,7 +7,7 @@ By:
 
 ## Overview
 
-In this deliverable, we added a series of code optimization passes to the compiler. To ensure the effectivness of our optimizations, we created microbenchmarks and a benchmark script that checks if the optimizations improved performance, both in isolation and in combination with other optimizations.
+In this deliverable, we added a series of code optimization passes to the compiler. To ensure the effectiveness of our optimizations, we created microbenchmarks and a benchmark script that checks if the optimizations improved performance, both in isolation and in combination with other optimizations.
 
 Our optimizations were: 
 - Constant Merging: Replaces operations on constants with the constant result.
@@ -79,7 +79,7 @@ main(n) {
 
 We identified this issue, fixed our tests, and all our optimizations were showing performance increases.
 
-We were trying to use auto-vectorization in my code. However, we were having issues because bounds-checking is automatically applied for each index into a loop. For this reason, the autovectorization passes were unable to vectorize a simple vector addition loop.
+We were trying to use auto-vectorization in my code. However, we were having issues because bounds-checking is automatically applied for each index into a loop. For this reason, the auto-vectorization passes were unable to vectorize a simple vector addition loop.
 
 ## Testing
 
